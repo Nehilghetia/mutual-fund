@@ -1,0 +1,118 @@
+body {
+  background-color: #fffaf4;
+  font-family: 'Poppins', sans-serif;
+  margin: 0;
+}
+
+/* Header */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 18px 60px;
+  background: #0a0a0a;
+  color: white;
+}
+.logo {
+  font-weight: 700;
+  font-size: 22px;
+}
+.navLinks {
+  list-style: none;
+  display: flex;
+  gap: 25px;
+}
+.navLinks a {
+  color: white;
+  text-decoration: none;
+  transition: 0.3s;
+}
+.navLinks a:hover {
+  color: #ff9f43;
+}
+.sipButton {
+  background: linear-gradient(90deg, #ff9f43, #ff6b00);
+  padding: 8px 16px;
+  border-radius: 8px;
+  color: white !important;
+  font-weight: 600;
+}
+
+/* Hero Section */
+.main {
+  padding: 60px 90px;
+}
+.hero {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 50px;
+}
+.heroText h1 {
+  font-size: 50px;
+  font-weight: 700;
+}
+.heroText span {
+  color: #ff7a00;
+}
+.heroText p {
+  margin-top: 20px;
+  color: #333;
+}
+.buttons {
+  margin-top: 30px;
+  display: flex;
+  gap: 20px;
+}
+.primaryBtn {
+  background: #ff7a00;
+  padding: 12px 25px;
+  color: white;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: 600;
+}
+.secondaryBtn {
+  border: 2px solid #ff7a00;
+  padding: 12px 25px;
+  border-radius: 8px;
+  text-decoration: none;
+  color: #ff7a00;
+  font-weight: 600;
+}
+.heroImg img {
+  width: 500px;
+  border-radius: 15px;
+}
+
+/* Why Choose Us */
+.whyChoose {
+  text-align: center;
+  margin-top: 80px;
+}
+.cards {
+  display: flex;
+  justify-content: center;
+  gap: 40px;
+  margin-top: 40px;
+}
+.card {
+  background: white;
+  border-radius: 15px;
+  box-shadow: 0 6px 16px rgba(0,0,0,0.1);
+  padding: 30px;
+  width: 280px;
+  transition: 0.3s;
+}
+.card:hover {
+  transform: translateY(-5px);
+}
+
+/* Footer */
+.footer {
+  text-align: center;
+  padding: 20px;
+  background: #0a0a0a;
+  color: #ccc;
+  margin-top: 80px;
+}

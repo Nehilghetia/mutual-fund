@@ -1,103 +1,169 @@
-import Image from "next/image";
+'use client';
 
-export default function Home() {
+import { Box, Typography, Button, Grid, Container } from '@mui/material';
+import Link from 'next/link';
+import Header from './components/Header';
+import Footer from './components/Footer';
+
+export default function HomePage() {
   return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              src/app/page.js
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+    <Box sx={{ bgcolor: '#0b0b0b', color: '#fff', minHeight: '100vh' }}>
+      <Header />
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+      {/* Hero Section */}
+<Box
+  sx={{
+    textAlign: 'center',
+    py: { xs: 10, md: 14 },
+    px: 3,
+    background: 'linear-gradient(135deg, #111, #1a1a1a)',
+  }}
+>
+  <Typography
+    variant="h3"
+    sx={{
+      fontWeight: 'bold',
+      mb: 2,
+      background: 'linear-gradient(90deg, #ff7a00, #ffb347)',
+      WebkitBackgroundClip: 'text',
+      WebkitTextFillColor: 'transparent',
+    }}
+  >
+    Empower Your Wealth with Smart Mutual Fund Investments
+  </Typography>
+
+  <Typography variant="h6" sx={{ mb: 4, color: '#bdbdbd', maxWidth: 700, mx: 'auto' }}>
+    Analyze, compare, and simulate thousands of funds to make smarter investment decisions.
+  </Typography>
+
+  <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, flexWrap: 'wrap' }}>
+    <Link href="/funds" passHref>
+      <Button
+        variant="contained"
+        sx={{
+          px: 5,
+          py: 1.5,
+          background: 'linear-gradient(90deg, #ff7a00, #ffb347)',
+          fontWeight: 'bold',
+          borderRadius: '10px',
+        }}
+      >
+        Explore Funds
+      </Button>
+    </Link>
+    <Link href="/calculator" passHref>
+      <Button
+        variant="outlined"
+        sx={{
+          px: 5,
+          py: 1.5,
+          borderColor: '#ff7a00',
+          color: '#ffb347',
+          borderRadius: '10px',
+          fontWeight: 'bold',
+        }}
+      >
+        Try Calculator
+      </Button>
+    </Link>
+  </Box>
+</Box>
+
+
+      {/* Why Choose Us Section */}
+<Container sx={{ py: 10 }}>
+  <Typography variant="h4" sx={{ mb: 6, fontWeight: 700, textAlign: 'center' }}>
+    Why Choose <span style={{ color: '#ff7a00' }}>FundExplorer</span>
+  </Typography>
+
+  <Grid container spacing={4} justifyContent="center">
+    {[
+      {
+        icon: '📊',
+        title: 'Comprehensive Fund Data',
+        desc: 'Access performance, returns, and fund insights updated in real-time.',
+        bg: '#1e1e1e',
+      },
+      {
+        icon: '💡',
+        title: 'Advanced SIP Calculator',
+        desc: 'Simulate your investments using real NAV history and analytics.',
+        bg: '#1e1e1e',
+      },
+      {
+        icon: '📈',
+        title: 'Smart Insights',
+        desc: 'Compare top-performing funds and make data-driven decisions.',
+        bg: '#1e1e1e',
+      },
+      {
+        icon: '🔒',
+        title: 'Secure & Reliable',
+        desc: 'Your data and transactions are encrypted to ensure complete safety and privacy.',
+        bg: '#1e1e1e',
+      },
+    ].map((feature, idx) => (
+      <Grid item xs={12} sm={6} md={3} key={idx}>
+        <Box
+          sx={{
+            p: 4,
+            textAlign: 'center',
+            bgcolor: feature.bg,
+            borderRadius: 4,
+            height: '100%',
+            transition: '0.3s',
+            '&:hover': {
+              transform: 'translateY(-5px)',
+              boxShadow: '0px 8px 25px rgba(255, 122, 0, 0.2)',
+            },
+          }}
+        >
+          <Typography sx={{ fontSize: 50 }}>{feature.icon}</Typography>
+          <Typography variant="h6" sx={{ mt: 2, mb: 1, fontWeight: 600 }}>
+            {feature.title}
+          </Typography>
+          <Typography variant="body2" sx={{ color: '#bdbdbd' }}>
+            {feature.desc}
+          </Typography>
+        </Box>
+      </Grid>
+    ))}
+  </Grid>
+</Container>
+
+      {/* Call to Action */}
+      <Box
+        sx={{
+          textAlign: 'center',
+          py: 10,
+          background: 'linear-gradient(90deg, #ff7a00, #ffb347)',
+          color: '#000',
+        }}
+      >
+        <Typography variant="h4" sx={{ fontWeight: 700, mb: 2 }}>
+          Start Your Investment Journey Today!
+        </Typography>
+        <Typography variant="body1" sx={{ mb: 4 }}>
+          Join thousands of investors using FundExplorer to track and grow their wealth.
+        </Typography>
+        <Link href="/signup" passHref>
+          <Button
+            variant="contained"
+            sx={{
+              background: '#000',
+              color: '#ffb347',
+              px: 5,
+              py: 1.5,
+              borderRadius: '10px',
+              fontWeight: 'bold',
+            }}
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+            Get Started
+          </Button>
+        </Link>
+      </Box>
+
+      <Footer />
+    </Box>
   );
 }
