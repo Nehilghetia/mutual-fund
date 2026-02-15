@@ -1,55 +1,52 @@
 'use client';
 
-import React from 'react';
-import { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
-  Box,
-  Typography,
-  Container,
-  CircularProgress,
-  Button,
-  Stack,
-  TextField,
-  IconButton,
+  Container, Typography, Grid, Card, CardContent, TextField,
+  Pagination, Button, Box, CircularProgress, FormControl,
+  InputLabel, Select, MenuItem, Paper, IconButton
 } from '@mui/material';
+import SearchIcon from '@mui/icons-material/Search';
 import StarIcon from '@mui/icons-material/Star';
 import StarBorderIcon from '@mui/icons-material/StarBorder';
+import Link from 'next/link';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
-import LazyFundCard from '../components/LazyFundCard';
 
 export default function FundsPage() {
   const [funds, setFunds] = useState([]);
   const [filteredFunds, setFilteredFunds] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [search, setSearch] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [sortOrder, setSortOrder] = useState('name_asc');
   const [watchlist, setWatchlist] = useState([]);
+  const [error, setError] = useState('');
 
-  const fundsPerPage = 10;
+  const fundsPerPage = 12; // Match active-funds (3 rows * 4 per row)
 
-  // Load watchlist from localStorage
+  // Load watchlist
   useEffect(() => {
     const stored = localStorage.getItem('watchlist');
     if (stored) setWatchlist(JSON.parse(stored));
   }, []);
 
-  // Save watchlist to localStorage
+  // Save watchlist
   useEffect(() => {
     localStorage.setItem('watchlist', JSON.stringify(watchlist));
   }, [watchlist]);
 
-  // Fetch all funds
+  // Fetch funds
   useEffect(() => {
     async function fetchFunds() {
       try {
         setLoading(true);
-        const res = await fetch('/api/mf', { cache: 'no-store' }); // Replace with your API
+        const res = await fetch('/api/mf', { cache: 'no-store' });
         if (!res.ok) throw new Error('Failed to fetch funds');
         const data = await res.json();
-        setFunds(data);
-        setFilteredFunds(data);
+        const allFunds = Array.isArray(data) ? data : (data.data || []);
+        setFunds(allFunds);
+        setFilteredFunds(allFunds);
       } catch (err) {
         console.error(err);
         setError(err.message);
@@ -60,200 +57,169 @@ export default function FundsPage() {
     fetchFunds();
   }, []);
 
-  // Filter funds by search query
+  // Filter and sort
   useEffect(() => {
-    const filtered = funds.filter((fund) =>
-      fund.schemeName.toLowerCase().includes(searchQuery.toLowerCase())
+    let processed = [...funds];
+    if (search) processed = processed.filter(s =>
+      s.schemeName.toLowerCase().includes(search.toLowerCase())
     );
-    setFilteredFunds(filtered);
-    setCurrentPage(1);
-  }, [searchQuery, funds]);
+    if (sortOrder === 'name_asc')
+      processed.sort((a, b) => a.schemeName.localeCompare(b.schemeName));
+    if (sortOrder === 'name_desc')
+      processed.sort((a, b) => b.schemeName.localeCompare(a.schemeName));
 
-  // Watchlist toggle
+    setFilteredFunds(processed);
+    setCurrentPage(1);
+  }, [search, funds, sortOrder]);
+
+  const totalPages = Math.ceil(filteredFunds.length / fundsPerPage);
+  const startIndex = (currentPage - 1) * fundsPerPage;
+  const currentFunds = filteredFunds.slice(startIndex, startIndex + fundsPerPage);
+
   const toggleWatchlist = (fund) => {
-    if (watchlist.find((w) => w.schemeCode === fund.schemeCode)) {
-      setWatchlist(watchlist.filter((w) => w.schemeCode !== fund.schemeCode));
+    if (watchlist.find(w => w.schemeCode === fund.schemeCode)) {
+      setWatchlist(watchlist.filter(w => w.schemeCode !== fund.schemeCode));
     } else {
       setWatchlist([...watchlist, fund]);
     }
   };
 
-  if (loading) {
-    return (
-      <Box sx={{ textAlign: 'center', mt: 10 }}>
-        <CircularProgress sx={{ color: '#ff7a00' }} />
-        <Typography mt={2} sx={{ color: '#fff' }}>
-          Loading mutual funds...
-        </Typography>
-      </Box>
-    );
-  }
+  if (loading) return (
+    <Container sx={{ py: 10, textAlign: 'center' }}>
+      <CircularProgress color="warning" />
+      <Typography variant="h6" sx={{ mt: 2, color: '#ffb347' }}>
+        Loading Mutual Funds...
+      </Typography>
+    </Container>
+  );
 
-  if (error) {
-    return (
-      <Box sx={{ textAlign: 'center', mt: 10 }}>
-        <Typography variant="h6" color="error">
-          {error}
-        </Typography>
-      </Box>
-    );
-  }
-
-  // Pagination
-  const totalPages = Math.ceil(filteredFunds.length / fundsPerPage);
-  const indexOfLastFund = currentPage * fundsPerPage;
-  const indexOfFirstFund = indexOfLastFund - fundsPerPage;
-  const currentFunds = filteredFunds.slice(indexOfFirstFund, indexOfLastFund);
-
-  // Generate page numbers
-  const pageNumbers = [];
-  const maxPageNumbersToShow = 5;
-  let startPage = Math.max(currentPage - 2, 1);
-  let endPage = Math.min(startPage + maxPageNumbersToShow - 1, totalPages);
-  if (endPage - startPage < maxPageNumbersToShow - 1) {
-    startPage = Math.max(endPage - maxPageNumbersToShow + 1, 1);
-  }
-  for (let i = startPage; i <= endPage; i++) pageNumbers.push(i);
-  if (!pageNumbers.includes(totalPages)) pageNumbers.push(totalPages);
+  if (error) return (
+    <Container sx={{ py: 10, textAlign: 'center' }}>
+      <Typography variant="h6" color="error">
+        {error}
+      </Typography>
+    </Container>
+  );
 
   return (
-    <Box sx={{ bgcolor: '#0b0b0b', minHeight: '100vh', color: '#fff' }}>
+    <Box sx={{ background: '#0d0d0d', minHeight: '100vh' }}>
       <Header />
 
-      <Container sx={{ py: 10 }}>
+      <Container maxWidth="xl" sx={{ py: 6 }}>
         <Typography
-          variant="h4"
-          sx={{ color: '#ffb347', fontWeight: 700, textAlign: 'center', mb: 3 }}
+          variant="h3"
+          align="center"
+          gutterBottom
+          sx={{ color: '#ffb347', fontWeight: 'bold', mb: 1 }}
         >
           Mutual Funds Explorer
         </Typography>
+        <Typography variant="body1" align="center" sx={{ color: '#ccc', mb: 5 }}>
+          Found {filteredFunds.length} schemes
+        </Typography>
 
-        {/* Search */}
-        <Box sx={{ mb: 5, textAlign: 'center' }}>
-          <TextField
-            label="Search Mutual Funds"
-            variant="outlined"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            sx={{
-              input: { color: '#fff' },
-              '& .MuiInputLabel-root': { color: '#bdbdbd' },
-              '& .MuiOutlinedInput-root': { '& fieldset': { borderColor: '#555' } },
-              width: '100%',
-              maxWidth: '400px',
-            }}
-          />
-        </Box>
-
-        {/* Fund Cards */}
-        <Box
-          sx={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
-            gap: 3,
-          }}
-        >
-          {currentFunds.length > 0 ? (
-            currentFunds.map((fund, index) => (
-              <Box key={index} sx={{ position: 'relative' }}>
-                <LazyFundCard fund={fund} />
-                <IconButton
-                  onClick={() => toggleWatchlist(fund)}
+        <Paper elevation={3} sx={{ p: 3, mb: 5, borderRadius: 3, background: '#1a1a1a', color: '#fff', border: '1px solid #333' }}>
+          <Grid container spacing={3} alignItems="center">
+            <Grid item xs={12} md={8}>
+              <TextField
+                fullWidth
+                label="Search by Scheme Name"
+                variant="outlined"
+                value={search}
+                onChange={e => setSearch(e.target.value)}
+                InputProps={{
+                  startAdornment: <SearchIcon sx={{ mr: 1, color: '#ffb347' }} />,
+                }}
+                InputLabelProps={{ style: { color: '#ffb347' } }}
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    color: '#fff',
+                    '& fieldset': { borderColor: '#444' },
+                    '&:hover fieldset': { borderColor: '#ffb347' },
+                  },
+                }}
+              />
+            </Grid>
+            <Grid item xs={12} md={4}>
+              <FormControl fullWidth>
+                <InputLabel sx={{ color: '#ffb347' }}>Sort By</InputLabel>
+                <Select
+                  value={sortOrder}
+                  label="Sort By"
+                  onChange={e => setSortOrder(e.target.value)}
                   sx={{
-                    position: 'absolute',
-                    top: 8,
-                    right: 8,
-                    color: watchlist.find((w) => w.schemeCode === fund.schemeCode)
-                      ? '#ffb347'
-                      : '#fff',
+                    color: '#fff',
+                    '.MuiOutlinedInput-notchedOutline': { borderColor: '#444' },
+                    '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: '#ffb347' },
                   }}
                 >
-                  {watchlist.find((w) => w.schemeCode === fund.schemeCode) ? (
-                    <StarIcon />
-                  ) : (
-                    <StarBorderIcon />
-                  )}
-                </IconButton>
-              </Box>
-            ))
-          ) : (
-            <Typography sx={{ color: '#fff', textAlign: 'center', gridColumn: '1/-1' }}>
-              No mutual funds found.
-            </Typography>
-          )}
-        </Box>
+                  <MenuItem value="name_asc">Scheme Name (A-Z)</MenuItem>
+                  <MenuItem value="name_desc">Scheme Name (Z-A)</MenuItem>
+                </Select>
+              </FormControl>
+            </Grid>
+          </Grid>
+        </Paper>
 
-        {/* Pagination */}
-        {currentFunds.length > 0 && (
-          <Stack direction="row" spacing={1} justifyContent="center" mt={6} flexWrap="wrap">
-            <Button onClick={() => setCurrentPage(1)} disabled={currentPage === 1}>
-              First
-            </Button>
-            <Button
-              onClick={() => setCurrentPage(Math.max(currentPage - 1, 1))}
-              disabled={currentPage === 1}
-            >
-              Previous
-            </Button>
+        <Grid container spacing={3}>
+          {currentFunds.map(s => (
+            <Grid item xs={6} md={6} key={s.schemeCode}>
+              <Card sx={{
+                height: '100%',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'space-between',
+                background: '#1a1a1a',
+                color: '#fff',
+                borderRadius: 3,
+                border: '1px solid #2a2a2a',
+                transition: '0.3s',
+                '&:hover': { transform: 'translateY(-6px)', boxShadow: '0 6px 18px rgba(255, 179, 71, 0.25)', borderColor: '#ffb347' },
+              }}>
+                <CardContent sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                  <Box sx={{ overflow: 'hidden', mr: 1 }}>
+                    <Typography variant="subtitle1" noWrap title={s.schemeName} sx={{ color: '#ffb347', fontWeight: 600, mb: 0.5 }}>
+                      {s.schemeName}
+                    </Typography>
+                    <Typography variant="caption" sx={{ color: '#aaa' }}>
+                      Scheme Code: {s.schemeCode}
+                    </Typography>
+                  </Box>
+                  <IconButton onClick={() => toggleWatchlist(s)} size="small">
+                    {watchlist.find(w => w.schemeCode === s.schemeCode) ? (
+                      <StarIcon color="warning" />
+                    ) : (
+                      <StarBorderIcon sx={{ color: '#ffb347' }} />
+                    )}
+                  </IconButton>
+                </CardContent>
+                <Box sx={{ p: 2, pt: 0 }}>
+                  <Button component={Link} href={`/scheme/${s.schemeCode}`} variant="contained" fullWidth
+                    sx={{ background: '#ffb347', color: '#0b0b0b', fontWeight: 'bold', borderRadius: 2, '&:hover': { background: '#ffaa47' } }}>
+                    VIEW DETAILS
+                  </Button>
+                </Box>
+              </Card>
+            </Grid>
+          ))}
+        </Grid>
 
-            {pageNumbers.map((page, idx) => {
-              if (idx > 0 && page - pageNumbers[idx - 1] > 1) {
-                return (
-                  <React.Fragment key={page}>
-                    <Typography sx={{ px: 1, color: '#fff', mt: '8px' }}>...</Typography>
-                    <Button
-                      variant={page === currentPage ? 'contained' : 'outlined'}
-                      sx={{
-                        color: page === currentPage ? '#000' : '#fff',
-                        background:
-                          page === currentPage
-                            ? 'linear-gradient(90deg, #ff7a00, #ffb347)'
-                            : 'transparent',
-                        borderColor: '#ff7a00',
-                        minWidth: '40px',
-                        fontWeight: 'bold',
-                      }}
-                      onClick={() => setCurrentPage(page)}
-                    >
-                      {page}
-                    </Button>
-                  </React.Fragment>
-                );
-              }
-              return (
-                <Button
-                  key={page}
-                  variant={page === currentPage ? 'contained' : 'outlined'}
-                  sx={{
-                    color: page === currentPage ? '#000' : '#fff',
-                    background:
-                      page === currentPage
-                        ? 'linear-gradient(90deg, #ff7a00, #ffb347)'
-                        : 'transparent',
-                    borderColor: '#ff7a00',
-                    minWidth: '40px',
-                    fontWeight: 'bold',
-                  }}
-                  onClick={() => setCurrentPage(page)}
-                >
-                  {page}
-                </Button>
-              );
-            })}
+        {filteredFunds.length === 0 && (
+          <Box textAlign="center" py={10}>
+            <Typography sx={{ color: '#888' }}>No schemes found.</Typography>
+          </Box>
+        )}
 
-            <Button
-              onClick={() => setCurrentPage(Math.min(currentPage + 1, totalPages))}
-              disabled={currentPage === totalPages}
-            >
-              Next
-            </Button>
-            <Button
-              onClick={() => setCurrentPage(totalPages)}
-              disabled={currentPage === totalPages}
-            >
-              Last
-            </Button>
-          </Stack>
+        {totalPages > 1 && (
+          <Box display="flex" justifyContent="center" mt={5}>
+            <Pagination
+              count={totalPages}
+              page={currentPage}
+              onChange={(e, page) => setCurrentPage(page)}
+              color="warning"
+              sx={{ '& .MuiPaginationItem-root': { color: '#fff', '&.Mui-selected': { backgroundColor: '#ffb347', color: '#000' } } }}
+            />
+          </Box>
         )}
       </Container>
 

@@ -3,10 +3,10 @@ import React from 'react';
 import Link from 'next/link';
 import styles from '../styles/Home.module.css';
 
-export default function Header() {
+export default function Header({ title }) {
   return (
     <header className={styles.header}>
-      <div className={styles.logo}>FundExplorer</div>
+      <div className={styles.logo}>{title || 'FundExplorer'}</div>
       <nav>
         <ul className={styles.navLinks}>
           <li><Link href="/">Home</Link></li>
