@@ -1,36 +1,52 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# 📊 Mutual Fund Explorer
 
-## Getting Started
+**Mutual Fund Explorer** is a premium, data-driven financial dashboard designed to empower investors with real-time insights, comprehensive fund analysis, and smart investment simulation tools. Built with a modern tech stack, it provides a seamless experience for tracking wealth and making informed decisions.
 
-First, run the development server:
+[![Next.js](https://img.shields.io/badge/Next.js-15-black?style=for-the-badge&logo=next.js)](https://nextjs.org/)
+[![Material UI](https://img.shields.io/badge/MUI-v7-blue?style=for-the-badge&logo=mui)](https://mui.com/)
+[![MongoDB](https://img.shields.io/badge/MongoDB-Latest-green?style=for-the-badge&logo=mongodb)](https://www.mongodb.com/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-v4-38B2AC?style=for-the-badge&logo=tailwind-css)](https://tailwindcss.com/)
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+---
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## ✨ Key Features
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+- **🔍 Advanced Fund Explorer**: Search and sort through thousands of mutual fund schemes with real-time data.
+- **🧮 Smart Calculators**: Visual simulations for SIP, SWP, Lumpsum, and Step-Up investment plans.
+- **🏆 Top Rankings**: Stay updated with the highest-performing funds in the current market.
+- **⭐️ Personalized Watchlist**: Save and track your favorite funds effortlessly.
+- **🔒 Secure Architecture**: Robust backend integrated with MongoDB and secure authentication.
+- **📊 Data Visualization**: Interactive charts powered by Chart.js and Recharts for clear financial insights.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+---
 
-## Learn More
+## 🗺️ Project Structure
 
-To learn more about Next.js, take a look at the following resources:
+- **`/funds`**: Explore, search, and filter the mutual fund universe.
+- **`/calculator`**: Professional-grade financial planning tools.
+- **`/ranking`**: Data-driven rankings of top market performers.
+- **`/watchlist`**: Your personal portfolio tracking dashboard.
+- **`/scheme/[id]`**: Deep technical details for every fund scheme.
+- **`/api`**: Scalable serverless backend routes.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+---
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## 🚀 Getting Started
 
-## Deploy on Vercel
+### Prerequisites
+- Node.js 18.x+
+- MongoDB instance
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### Installation
+1. `git clone https://github.com/yourusername/mutual-fund-explorer.git`
+2. `npm install`
+3. Create `.env.local` with `MONGODB_URI`
+4. `npm run dev`
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+---
+
+## 🛡️ License
+This project is licensed under the MIT License.
+
+---
+Built with ❤️ by [Nehil Ghetia](https://github.com/nehilghetia)
