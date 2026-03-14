@@ -3,9 +3,9 @@
 import { Box, Typography, Grid, Container, Divider } from '@mui/material';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
-import { useInView } from 'react-intersection-observer';
 
 export default function RankingPage() {
+
   const topFunds = [
     { rank: 1, name: 'SBI Bluechip Fund', category: 'Large Cap', return: '12.5%' },
     { rank: 2, name: 'HDFC Midcap Opportunities Fund', category: 'Mid Cap', return: '15.2%' },
@@ -21,89 +21,112 @@ export default function RankingPage() {
 
   return (
     <Box sx={{ bgcolor: '#0b0b0b', color: '#fff', minHeight: '100vh' }}>
+
+
       <Header />
 
       <Container sx={{ py: 10 }}>
-        <Typography variant="h4" sx={{ textAlign: 'center', mb: 6, fontWeight: 700 }}>
+
+        <Typography
+          variant="h4"
+          sx={{ textAlign: 'center', mb: 6, fontWeight: 700 }}
+        >
           Top <span style={{ color: '#ff7a00' }}>Ranked Mutual Funds</span>
         </Typography>
 
         <Grid container spacing={4}>
-          {topFunds.map((fund) => {
-            const { ref, inView } = useInView({
-              triggerOnce: true, // load only once when visible
-              threshold: 0.1,
-            });
 
-            return (
-              <Grid item xs={12} sm={6} md={3} key={fund.rank} ref={ref}>
-                {inView ? (
-                  <Box
-                    sx={{
-                      bgcolor: '#1e1e1e',
-                      borderRadius: 4,
-                      p: 4,
-                      textAlign: 'center',
-                      transition: '0.3s',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      justifyContent: 'space-between',
-                      height: '100%',
-                      '&:hover': {
-                        transform: 'translateY(-5px)',
-                        boxShadow: '0px 8px 25px rgba(255, 122, 0, 0.2)',
-                      },
-                    }}
-                  >
-                    <Box>
-                      <Typography sx={{ fontSize: 40, fontWeight: 700, color: '#ff7a00' }}>
-                        #{fund.rank}
-                      </Typography>
-                      <Typography variant="h6" sx={{ fontWeight: 600, mt: 1 }}>
-                        {fund.name}
-                      </Typography>
-                      <Typography sx={{ color: '#bdbdbd', mt: 1 }}>{fund.category}</Typography>
-                    </Box>
+          {topFunds.map((fund) => (
 
-                    <Box>
-                      <Typography sx={{ color: '#ffb347', mt: 2, fontWeight: 600 }}>
-                        {fund.return} Returns (3Y)
-                      </Typography>
-                    </Box>
-                  </Box>
-                ) : (
-                  // Placeholder box to maintain spacing
-                  <Box sx={{ height: '250px', bgcolor: '#1e1e1e', borderRadius: 4 }} />
-                )}
-              </Grid>
-            );
-          })}
+            <Grid item xs={12} sm={6} md={3} key={fund.rank}>
+
+              <Box
+                sx={{
+                  bgcolor: '#1e1e1e',
+                  borderRadius: 4,
+                  p: 4,
+                  textAlign: 'center',
+                  transition: '0.3s',
+                  height: '100%',
+                  '&:hover': {
+                    transform: 'translateY(-5px)',
+                    boxShadow: '0px 8px 25px rgba(255,122,0,0.2)',
+                  },
+                }}
+              >
+
+                <Typography
+                  sx={{
+                    fontSize: 40,
+                    fontWeight: 700,
+                    color: '#ff7a00',
+                  }}
+                >
+                  #{fund.rank}
+                </Typography>
+
+                <Typography
+                  variant="h6"
+                  sx={{ fontWeight: 600, mt: 1 }}
+                >
+                  {fund.name}
+                </Typography>
+
+                <Typography sx={{ color: '#bdbdbd', mt: 1 }}>
+                  {fund.category}
+                </Typography>
+
+                <Typography
+                  sx={{
+                    color: '#ffb347',
+                    mt: 2,
+                    fontWeight: 600,
+                  }}
+                >
+                  {fund.return} Returns (3Y)
+                </Typography>
+
+              </Box>
+
+            </Grid>
+
+          ))}
+
         </Grid>
+
       </Container>
 
       <Divider sx={{ borderColor: '#2b2b2b', my: 4 }} />
 
-      {/* Fund Insights Section */}
       <Container sx={{ py: 8, textAlign: 'center' }}>
+
         <Typography
           variant="h5"
           sx={{
             mb: 3,
             fontWeight: 700,
-            background: 'linear-gradient(90deg, #ff7a00, #ffb347)',
+            background: 'linear-gradient(90deg,#ff7a00,#ffb347)',
             WebkitBackgroundClip: 'text',
             WebkitTextFillColor: 'transparent',
           }}
         >
           Fund Performance Insights
         </Typography>
-        <Typography sx={{ color: '#bdbdbd', maxWidth: 800, mx: 'auto', mb: 4 }}>
-          Mid-cap and small-cap funds continue to outperform large-cap funds in 3-year returns.
-          However, large-cap and hybrid funds remain stable choices for risk-averse investors.
+
+        <Typography
+          sx={{ color: '#bdbdbd', maxWidth: 800, mx: 'auto', mb: 4 }}
+        >
+          Mid-cap and small-cap funds continue to outperform large-cap funds in
+          3-year returns. However, large-cap and hybrid funds remain stable
+          choices for risk-averse investors.
         </Typography>
+
       </Container>
 
       <Footer />
+
     </Box>
+
+
   );
 }
