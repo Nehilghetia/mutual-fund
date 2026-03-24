@@ -10,8 +10,9 @@ import SearchIcon from '@mui/icons-material/Search';
 import StarIcon from '@mui/icons-material/Star';
 import StarBorderIcon from '@mui/icons-material/StarBorder';
 import Link from 'next/link';
-import Header from '../components/Header';
-import Footer from '../components/Footer';
+import useWatchlist from '@/hooks/useWatchlist';
+import Header from '@/app/components/Header';
+import Footer from '@/app/components/Footer';
 
 export default function FundsPage() {
   const [funds, setFunds] = useState([]);
@@ -20,21 +21,10 @@ export default function FundsPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(true);
   const [sortOrder, setSortOrder] = useState('name_asc');
-  const [watchlist, setWatchlist] = useState([]);
   const [error, setError] = useState('');
+  const { watchlist, toggleWatchlist, isInWatchlist } = useWatchlist();
 
-  const fundsPerPage = 12; // Match active-funds (3 rows * 4 per row)
-
-  // Load watchlist
-  useEffect(() => {
-    const stored = localStorage.getItem('watchlist');
-    if (stored) setWatchlist(JSON.parse(stored));
-  }, []);
-
-  // Save watchlist
-  useEffect(() => {
-    localStorage.setItem('watchlist', JSON.stringify(watchlist));
-  }, [watchlist]);
+  const fundsPerPage = 12;
 
   // Fetch funds
   useEffect(() => {
@@ -42,7 +32,10 @@ export default function FundsPage() {
       try {
         setLoading(true);
         const res = await fetch('/api/mf', { cache: 'no-store' });
-        if (!res.ok) throw new Error('Failed to fetch funds');
+        if (!res.ok) {
+          const errorData = await res.json().catch(() => ({}));
+          throw new Error(errorData.error || 'Failed to fetch funds. The external service might be down.');
+        }
         const data = await res.json();
         const allFunds = Array.isArray(data) ? data : (data.data || []);
         setFunds(allFunds);
@@ -76,14 +69,6 @@ export default function FundsPage() {
   const startIndex = (currentPage - 1) * fundsPerPage;
   const currentFunds = filteredFunds.slice(startIndex, startIndex + fundsPerPage);
 
-  const toggleWatchlist = (fund) => {
-    if (watchlist.find(w => w.schemeCode === fund.schemeCode)) {
-      setWatchlist(watchlist.filter(w => w.schemeCode !== fund.schemeCode));
-    } else {
-      setWatchlist([...watchlist, fund]);
-    }
-  };
-
   if (loading) return (
     <Container sx={{ py: 10, textAlign: 'center' }}>
       <CircularProgress color="warning" />
@@ -95,9 +80,19 @@ export default function FundsPage() {
 
   if (error) return (
     <Container sx={{ py: 10, textAlign: 'center' }}>
-      <Typography variant="h6" color="error">
+      <Typography variant="h5" color="error" sx={{ mb: 2 }}>
+        ⚠️ Connection Error
+      </Typography>
+      <Typography variant="h6" sx={{ color: '#ccc', mb: 4 }}>
         {error}
       </Typography>
+      <Button
+        variant="contained"
+        onClick={() => window.location.reload()}
+        sx={{ background: '#ffb347', color: '#000', fontWeight: 'bold' }}
+      >
+        Retry Again
+      </Button>
     </Container>
   );
 

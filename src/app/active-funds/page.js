@@ -10,6 +10,7 @@ import SearchIcon from '@mui/icons-material/Search';
 import StarIcon from '@mui/icons-material/Star';
 import StarBorderIcon from '@mui/icons-material/StarBorder';
 import Link from 'next/link';
+import useWatchlist from '@/hooks/useWatchlist';
 import Header from '@/app/components/Header';
 import Footer from '@/app/components/Footer';
 
@@ -20,26 +21,23 @@ export default function ActiveFunds() {
   const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(true);
   const [sortOrder, setSortOrder] = useState('name_asc');
-  const [watchlist, setWatchlist] = useState([]);
+  const [error, setError] = useState('');
+  const { watchlist, toggleWatchlist, isInWatchlist } = useWatchlist();
 
-  const schemesPerPage = 12; // 3 rows * 4 per row
-
-  // Load watchlist from localStorage
-  useEffect(() => {
-    const stored = localStorage.getItem('watchlist');
-    if (stored) setWatchlist(JSON.parse(stored));
-  }, []);
-
-  // Save watchlist to localStorage
-  useEffect(() => {
-    localStorage.setItem('watchlist', JSON.stringify(watchlist));
-  }, [watchlist]);
+  const schemesPerPage = 12;
 
   // Fetch active schemes
   useEffect(() => {
     setLoading(true);
     fetch('/api/mf/active')
-      .then(res => res.json())
+      .then(res => {
+        if (!res.ok) {
+          return res.json().then(errorData => {
+            throw new Error(errorData.error || 'Connection failed.');
+          });
+        }
+        return res.json();
+      })
       .then(data => {
         const activeSchemes = data.data || [];
         setSchemes(activeSchemes);
@@ -48,6 +46,7 @@ export default function ActiveFunds() {
       })
       .catch(err => {
         console.error('Error fetching schemes:', err);
+        setError(err.message);
         setLoading(false);
       });
   }, []);
@@ -70,21 +69,30 @@ export default function ActiveFunds() {
   const startIndex = (currentPage - 1) * schemesPerPage;
   const currentSchemes = filteredSchemes.slice(startIndex, startIndex + schemesPerPage);
 
-  // Watchlist toggle
-  const toggleWatchlist = (scheme) => {
-    if (watchlist.find(w => w.schemeCode === scheme.schemeCode)) {
-      setWatchlist(watchlist.filter(w => w.schemeCode !== scheme.schemeCode));
-    } else {
-      setWatchlist([...watchlist, scheme]);
-    }
-  };
-
   if (loading) return (
     <Container sx={{ py: 10, textAlign: 'center' }}>
       <CircularProgress color="warning" />
       <Typography variant="h6" sx={{ mt: 2, color: '#ffb347' }}>
         Loading Active Schemes...
       </Typography>
+    </Container>
+  );
+
+  if (error) return (
+    <Container sx={{ py: 10, textAlign: 'center' }}>
+      <Typography variant="h5" color="error" sx={{ mb: 2 }}>
+        ⚠️ Connection Error
+      </Typography>
+      <Typography variant="h6" sx={{ color: '#ccc', mb: 4 }}>
+        {error}
+      </Typography>
+      <Button
+        variant="contained"
+        onClick={() => window.location.reload()}
+        sx={{ background: '#ffb347', color: '#000', fontWeight: 'bold' }}
+      >
+        Retry Again
+      </Button>
     </Container>
   );
 
