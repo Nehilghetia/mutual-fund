@@ -10,7 +10,6 @@ import SearchIcon from '@mui/icons-material/Search';
 import StarIcon from '@mui/icons-material/Star';
 import StarBorderIcon from '@mui/icons-material/StarBorder';
 import Link from 'next/link';
-import useWatchlist from '@/hooks/useWatchlist';
 import Header from '@/app/components/Header';
 import Footer from '@/app/components/Footer';
 
@@ -21,23 +20,26 @@ export default function ActiveFunds() {
   const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(true);
   const [sortOrder, setSortOrder] = useState('name_asc');
-  const [error, setError] = useState('');
-  const { watchlist, toggleWatchlist, isInWatchlist } = useWatchlist();
+  const [watchlist, setWatchlist] = useState([]);
 
-  const schemesPerPage = 12;
+  const schemesPerPage = 12; // 3 rows * 4 per row
+
+  // Load watchlist from localStorage
+  useEffect(() => {
+    const stored = localStorage.getItem('watchlist');
+    if (stored) setWatchlist(JSON.parse(stored));
+  }, []);
+
+  // Save watchlist to localStorage
+  useEffect(() => {
+    localStorage.setItem('watchlist', JSON.stringify(watchlist));
+  }, [watchlist]);
 
   // Fetch active schemes
   useEffect(() => {
     setLoading(true);
     fetch('/api/mf/active')
-      .then(res => {
-        if (!res.ok) {
-          return res.json().then(errorData => {
-            throw new Error(errorData.error || 'Connection failed.');
-          });
-        }
-        return res.json();
-      })
+      .then(res => res.json())
       .then(data => {
         const activeSchemes = data.data || [];
         setSchemes(activeSchemes);
@@ -46,7 +48,6 @@ export default function ActiveFunds() {
       })
       .catch(err => {
         console.error('Error fetching schemes:', err);
-        setError(err.message);
         setLoading(false);
       });
   }, []);
@@ -69,30 +70,21 @@ export default function ActiveFunds() {
   const startIndex = (currentPage - 1) * schemesPerPage;
   const currentSchemes = filteredSchemes.slice(startIndex, startIndex + schemesPerPage);
 
+  // Watchlist toggle
+  const toggleWatchlist = (scheme) => {
+    if (watchlist.find(w => w.schemeCode === scheme.schemeCode)) {
+      setWatchlist(watchlist.filter(w => w.schemeCode !== scheme.schemeCode));
+    } else {
+      setWatchlist([...watchlist, scheme]);
+    }
+  };
+
   if (loading) return (
     <Container sx={{ py: 10, textAlign: 'center' }}>
       <CircularProgress color="warning" />
       <Typography variant="h6" sx={{ mt: 2, color: '#ffb347' }}>
         Loading Active Schemes...
       </Typography>
-    </Container>
-  );
-
-  if (error) return (
-    <Container sx={{ py: 10, textAlign: 'center' }}>
-      <Typography variant="h5" color="error" sx={{ mb: 2 }}>
-        ⚠️ Connection Error
-      </Typography>
-      <Typography variant="h6" sx={{ color: '#ccc', mb: 4 }}>
-        {error}
-      </Typography>
-      <Button
-        variant="contained"
-        onClick={() => window.location.reload()}
-        sx={{ background: '#ffb347', color: '#000', fontWeight: 'bold' }}
-      >
-        Retry Again
-      </Button>
     </Container>
   );
 
@@ -109,9 +101,17 @@ export default function ActiveFunds() {
         >
           Active Mutual Funds
         </Typography>
-        <Typography variant="body1" align="center" sx={{ color: '#ccc', mb: 5 }}>
+        <Typography variant="body1" align="center" sx={{ color: '#ccc', mb: 2 }}>
           Found {filteredSchemes.length} schemes
         </Typography>
+
+        {schemes.length > 0 && schemes.length <= 30 && (
+          <Box sx={{ mb: 4, p: 2, bgcolor: 'rgba(255, 179, 71, 0.1)', border: '1px solid #ffb347', borderRadius: 2, textAlign: 'center' }}>
+            <Typography variant="body2" sx={{ color: '#ffb347', fontWeight: 'bold' }}>
+              ⚠️ External API (mfapi.in) is currently down. Showing {schemes.length} popular fallback funds for preview.
+            </Typography>
+          </Box>
+        )}
 
         <Paper elevation={3} sx={{ p: 3, mb: 5, borderRadius: 3, background: '#1a1a1a', color: '#fff', border: '1px solid #333' }}>
           <Grid container spacing={3} alignItems="center">

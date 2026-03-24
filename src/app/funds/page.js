@@ -10,9 +10,8 @@ import SearchIcon from '@mui/icons-material/Search';
 import StarIcon from '@mui/icons-material/Star';
 import StarBorderIcon from '@mui/icons-material/StarBorder';
 import Link from 'next/link';
-import useWatchlist from '@/hooks/useWatchlist';
-import Header from '@/app/components/Header';
-import Footer from '@/app/components/Footer';
+import Header from '../components/Header';
+import Footer from '../components/Footer';
 
 export default function FundsPage() {
   const [funds, setFunds] = useState([]);
@@ -21,10 +20,21 @@ export default function FundsPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(true);
   const [sortOrder, setSortOrder] = useState('name_asc');
+  const [watchlist, setWatchlist] = useState([]);
   const [error, setError] = useState('');
-  const { watchlist, toggleWatchlist, isInWatchlist } = useWatchlist();
 
-  const fundsPerPage = 12;
+  const fundsPerPage = 12; // Match active-funds (3 rows * 4 per row)
+
+  // Load watchlist
+  useEffect(() => {
+    const stored = localStorage.getItem('watchlist');
+    if (stored) setWatchlist(JSON.parse(stored));
+  }, []);
+
+  // Save watchlist
+  useEffect(() => {
+    localStorage.setItem('watchlist', JSON.stringify(watchlist));
+  }, [watchlist]);
 
   // Fetch funds
   useEffect(() => {
@@ -32,10 +42,7 @@ export default function FundsPage() {
       try {
         setLoading(true);
         const res = await fetch('/api/mf', { cache: 'no-store' });
-        if (!res.ok) {
-          const errorData = await res.json().catch(() => ({}));
-          throw new Error(errorData.error || 'Failed to fetch funds. The external service might be down.');
-        }
+        if (!res.ok) throw new Error('Failed to fetch funds');
         const data = await res.json();
         const allFunds = Array.isArray(data) ? data : (data.data || []);
         setFunds(allFunds);
@@ -69,6 +76,14 @@ export default function FundsPage() {
   const startIndex = (currentPage - 1) * fundsPerPage;
   const currentFunds = filteredFunds.slice(startIndex, startIndex + fundsPerPage);
 
+  const toggleWatchlist = (fund) => {
+    if (watchlist.find(w => w.schemeCode === fund.schemeCode)) {
+      setWatchlist(watchlist.filter(w => w.schemeCode !== fund.schemeCode));
+    } else {
+      setWatchlist([...watchlist, fund]);
+    }
+  };
+
   if (loading) return (
     <Container sx={{ py: 10, textAlign: 'center' }}>
       <CircularProgress color="warning" />
@@ -80,19 +95,9 @@ export default function FundsPage() {
 
   if (error) return (
     <Container sx={{ py: 10, textAlign: 'center' }}>
-      <Typography variant="h5" color="error" sx={{ mb: 2 }}>
-        ⚠️ Connection Error
-      </Typography>
-      <Typography variant="h6" sx={{ color: '#ccc', mb: 4 }}>
+      <Typography variant="h6" color="error">
         {error}
       </Typography>
-      <Button
-        variant="contained"
-        onClick={() => window.location.reload()}
-        sx={{ background: '#ffb347', color: '#000', fontWeight: 'bold' }}
-      >
-        Retry Again
-      </Button>
     </Container>
   );
 
@@ -109,9 +114,17 @@ export default function FundsPage() {
         >
           Mutual Funds Explorer
         </Typography>
-        <Typography variant="body1" align="center" sx={{ color: '#ccc', mb: 5 }}>
+        <Typography variant="body1" align="center" sx={{ color: '#ccc', mb: 2 }}>
           Found {filteredFunds.length} schemes
         </Typography>
+
+        {funds.length > 0 && funds.length <= 30 && (
+          <Box sx={{ mb: 4, p: 2, bgcolor: 'rgba(255, 179, 71, 0.1)', border: '1px solid #ffb347', borderRadius: 2, textAlign: 'center' }}>
+            <Typography variant="body2" sx={{ color: '#ffb347', fontWeight: 'bold' }}>
+              ⚠️ External API (mfapi.in) is currently down. Showing {funds.length} popular fallback funds for preview.
+            </Typography>
+          </Box>
+        )}
 
         <Paper elevation={3} sx={{ p: 3, mb: 5, borderRadius: 3, background: '#1a1a1a', color: '#fff', border: '1px solid #333' }}>
           <Grid container spacing={3} alignItems="center">

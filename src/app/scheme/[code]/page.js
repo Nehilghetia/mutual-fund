@@ -18,6 +18,8 @@ export default function SchemeDetailPage() {
   const [calculatorTab, setCalculatorTab] = useState(0);
   const [selectedPeriod, setSelectedPeriod] = useState('1Y');
   const [chartData, setChartData] = useState([]);
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   const periods = ['1D', '1M', '3M', '1Y', '5Y'];
 
@@ -25,12 +27,22 @@ export default function SchemeDetailPage() {
     if (!code) return;
     async function fetchScheme() {
       try {
-        const res = await fetch(`https://api.mfapi.in/mf/${code}`);
+        setLoading(true);
+        setError(null);
+        // Using our internal proxy route instead of calling mfapi directly
+        const res = await fetch(`/api/mf/scheme/${code}`);
+        if (!res.ok) {
+          const errorData = await res.json().catch(() => ({}));
+          throw new Error(errorData.error || 'Details for this scheme are currently unavailable.');
+        }
         const data = await res.json();
-        if (!data || !data.meta) return;
+        if (!data || !data.meta) throw new Error('Invalid fund data received.');
         setScheme(data);
       } catch (err) {
         console.error('Error fetching scheme:', err);
+        setError(err.message);
+      } finally {
+        setLoading(false);
       }
     }
     fetchScheme();
@@ -54,11 +66,23 @@ export default function SchemeDetailPage() {
     }
   }, [scheme, selectedPeriod]);
 
-  if (!scheme) return (
+  if (loading) return (
     <Box sx={{ background: '#0b0b0b', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
       <Typography variant="h6" sx={{ color: '#ffb347' }}>Loading Scheme Details...</Typography>
     </Box>
   );
+
+  if (error) return (
+    <Box sx={{ background: '#0b0b0b', minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', p: 3 }}>
+      <Typography variant="h5" color="error" sx={{ mb: 2 }}>⚠️ Data Unavailable</Typography>
+      <Typography variant="body1" sx={{ color: '#ccc', mb: 4, textAlign: 'center' }}>{error}</Typography>
+      <Button variant="contained" onClick={() => window.location.reload()} sx={{ background: '#ff7a00', color: '#000', fontWeight: 'bold' }}>
+        Try Again
+      </Button>
+    </Box>
+  );
+
+  if (!scheme) return null;
 
   return (
     <Box sx={{ background: '#0b0b0b', color: '#fff', minHeight: '100vh' }}>
@@ -107,6 +131,14 @@ export default function SchemeDetailPage() {
             data={chartData}
             title={`${selectedPeriod} NAV History`}
           />
+          {scheme.isPartial && (
+            <Box sx={{ mt: 2, p: 2, bgcolor: 'rgba(255, 179, 71, 0.1)', borderRadius: 2, border: '1px dashed #ffb347' }}>
+              <Typography variant="body2" sx={{ color: '#ffb347', textAlign: 'center' }}>
+                📊 Historical chart data is temporarily unavailable due to external API downtime.
+                Showing latest official NAV from AMFI.
+              </Typography>
+            </Box>
+          )}
         </Box>
 
         {/* 2️⃣ Mutual Fund Calculators */}
