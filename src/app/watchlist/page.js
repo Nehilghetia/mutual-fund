@@ -12,75 +12,125 @@ export default function WatchlistPage() {
   const { watchlist, toggleWatchlist } = useWatchlist();
 
   return (
-    <Box sx={{ background: '#0d0d0d', minHeight: '100vh', color: '#fff' }}>
+    <Box sx={{ minHeight: '100vh', position: 'relative', pt: 12 }}>
       <Header />
 
       <Container maxWidth="xl" sx={{ py: 6 }}>
-        <Typography
-          variant="h3"
-          align="center"
-          gutterBottom
-          sx={{ color: '#ffb347', fontWeight: 'bold', mb: 1 }}
-        >
-          My Watchlist
-        </Typography>
-        <Typography variant="body1" align="center" sx={{ color: '#ccc', mb: 5 }}>
-          {watchlist.length} {watchlist.length === 1 ? 'fund' : 'funds'} saved
-        </Typography>
+        <Box sx={{ textAlign: 'center', mb: 8 }}>
+          <Typography
+            variant="h2"
+            sx={{
+              fontWeight: 900,
+              color: '#fff',
+              mb: 2,
+              letterSpacing: '-0.03em'
+            }}
+          >
+            My <span style={{ color: '#ff7a00' }}>Watchlist</span>
+          </Typography>
+          <Typography variant="h6" sx={{ color: 'rgba(255, 255, 255, 0.6)', maxWidth: 600, mx: 'auto', fontWeight: 500 }}>
+            You have saved {watchlist.length} {watchlist.length === 1 ? 'fund' : 'funds'} for tracking.
+          </Typography>
+        </Box>
 
         {watchlist.length === 0 ? (
-          <Box textAlign="center" py={10}>
-            <Typography variant="h6" sx={{ color: '#888' }}>
-              No funds in your watchlist yet.
+          <Box className="glass-card" sx={{ textAlign: 'center', py: 10, px: 4 }}>
+            <Typography variant="h5" sx={{ color: '#888', mb: 4, fontWeight: 700 }}>
+              Your watchlist is currently empty.
             </Typography>
             <Button
               component={Link}
               href="/funds"
-              variant="outlined"
-              sx={{ mt: 3, color: '#ffb347', borderColor: '#ffb347', '&:hover': { borderColor: '#ffaa47', background: 'rgba(255, 179, 71, 0.1)' } }}
+              variant="contained"
+              sx={{
+                px: 6,
+                py: 2,
+                borderRadius: '14px',
+                background: 'linear-gradient(90deg, #ff7a00, #ffb347)',
+                fontWeight: 800,
+                color: '#000',
+                textTransform: 'none',
+                '&:hover': {
+                  background: 'linear-gradient(90deg, #ffb347, #ff7a00)',
+                  boxShadow: '0 8px 25px rgba(255, 122, 0, 0.4)'
+                }
+              }}
             >
-              Browse Funds
+              Discover Funds Now
             </Button>
           </Box>
         ) : (
-          <Grid container spacing={3}>
+          <Box
+            sx={{
+              display: 'grid',
+              gridTemplateColumns: {
+                xs: '1fr',
+                sm: 'repeat(2, 1fr)',
+                lg: 'repeat(3, 1fr)',
+                xl: 'repeat(4, 1fr)'
+              },
+              gap: 3
+            }}
+          >
             {watchlist.map((s) => (
-              <Grid item xs={6} md={6} key={s.schemeCode}>
-                <Card sx={{
+              <Card
+                key={s.schemeCode}
+                className="glass-card"
+                sx={{
                   height: '100%',
                   display: 'flex',
                   flexDirection: 'column',
                   justifyContent: 'space-between',
-                  background: '#1a1a1a',
+                  background: 'rgba(26, 26, 26, 0.6)',
+                  backdropFilter: 'blur(10px)',
                   color: '#fff',
-                  borderRadius: 3,
-                  border: '1px solid #2a2a2a',
+                  borderRadius: 4,
+                  border: '1px solid rgba(255, 255, 255, 0.05)',
                   transition: '0.3s',
-                  '&:hover': { transform: 'translateY(-6px)', boxShadow: '0 6px 18px rgba(255, 179, 71, 0.25)', borderColor: '#ffb347' },
-                }}>
-                  <CardContent sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                    <Box sx={{ overflow: 'hidden', mr: 1 }}>
-                      <Typography variant="subtitle1" noWrap title={s.schemeName} sx={{ color: '#ffb347', fontWeight: 600, mb: 0.5 }}>
-                        {s.schemeName}
-                      </Typography>
-                      <Typography variant="caption" sx={{ color: '#aaa' }}>
-                        Scheme Code: {s.schemeCode}
-                      </Typography>
-                    </Box>
-                    <IconButton onClick={() => toggleWatchlist(s)} size="small">
-                      <StarIcon color="warning" />
-                    </IconButton>
-                  </CardContent>
-                  <Box sx={{ p: 2, pt: 0 }}>
-                    <Button component={Link} href={`/scheme/${s.schemeCode}`} variant="contained" fullWidth
-                      sx={{ background: '#ffb347', color: '#0b0b0b', fontWeight: 'bold', borderRadius: 2, '&:hover': { background: '#ffaa47' } }}>
-                      VIEW DETAILS
-                    </Button>
+                  '&:hover': {
+                    transform: 'translateY(-6px)',
+                    boxShadow: '0 10px 30px rgba(255, 179, 71, 0.15)',
+                    borderColor: '#ffb347'
+                  },
+                }}
+              >
+                <CardContent sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', p: 3 }}>
+                  <Box sx={{ overflow: 'hidden', mr: 1 }}>
+                    <Typography variant="subtitle1" sx={{ color: '#ffb347', fontWeight: 800, mb: 1, lineHeight: 1.3 }}>
+                      {s.schemeName}
+                    </Typography>
+                    <Typography variant="caption" sx={{ color: 'rgba(255, 255, 255, 0.5)', fontWeight: 600 }}>
+                      CODE: {s.schemeCode}
+                    </Typography>
                   </Box>
-                </Card>
-              </Grid>
+                  <IconButton onClick={() => toggleWatchlist(s)} size="small" sx={{ mt: -0.5 }}>
+                    <StarIcon sx={{ color: '#ff7a00' }} />
+                  </IconButton>
+                </CardContent>
+                <Box sx={{ p: 3, pt: 0 }}>
+                  <Button component={Link} href={`/scheme/${s.schemeCode}`} variant="contained" fullWidth
+                    sx={{
+                      background: 'linear-gradient(135deg, #ff7a00, #ffb347)',
+                      color: '#000',
+                      fontWeight: 900,
+                      borderRadius: 3,
+                      py: 1.2,
+                      textTransform: 'none',
+                      fontSize: '0.95rem',
+                      transition: 'all 0.3s ease',
+                      '&:hover': {
+                        background: 'linear-gradient(135deg, #ffb347, #ff7a00)',
+                        filter: 'brightness(1.1)',
+                        boxShadow: '0 8px 25px rgba(255, 122, 0, 0.4)'
+                      }
+                    }}
+                  >
+                    View Details
+                  </Button>
+                </Box>
+              </Card>
             ))}
-          </Grid>
+          </Box>
         )}
       </Container>
 

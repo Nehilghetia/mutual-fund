@@ -109,21 +109,37 @@ export default function CalculatorPage() {
   };
 
   return (
-    <Box sx={{ bgcolor: '#0b0b0b', color: '#fff', minHeight: '100vh' }}>
+    <Box sx={{ minHeight: '100vh', position: 'relative', pt: 12 }}>
       <Header />
-      <Container sx={{ py: 10 }}>
-        <Typography variant="h4" sx={{ textAlign: 'center', mb: 5, fontWeight: 700 }}>
-          Mutual Fund <span style={{ color: '#ff7a00' }}>Investment Calculators</span>
-        </Typography>
+      <Container maxWidth={false} sx={{ py: 8, px: { xs: 2, md: 8 } }}>
+        <Box sx={{ textAlign: 'center', mb: 8 }}>
+          <Typography
+            variant="h2"
+            sx={{
+              fontWeight: 900,
+              color: '#fff',
+              mb: 2,
+              letterSpacing: '-0.03em'
+            }}
+          >
+            Financial <span style={{ color: '#ff7a00' }}>Calculators</span>
+          </Typography>
+          <Typography variant="h6" sx={{ color: 'rgba(255, 255, 255, 0.6)', maxWidth: 600, mx: 'auto', fontWeight: 500 }}>
+            Plan your future with precision. Predict growth, withdrawals, and wealth accumulation.
+          </Typography>
+        </Box>
 
-        {/* Tabs for different calculators */}
         <Tabs
           value={tab}
           onChange={handleTabChange}
           centered
           textColor="inherit"
           TabIndicatorProps={{ style: { backgroundColor: '#ff7a00' } }}
-          sx={{ mb: 5 }}
+          sx={{
+            mb: 8,
+            '& .MuiTab-root': { fontWeight: 800, fontSize: '1rem', color: 'rgba(255,255,255,0.5)' },
+            '& .Mui-selected': { color: '#ff7a00 !important' }
+          }}
         >
           <Tab label="SIP" />
           <Tab label="SWP" />
@@ -132,45 +148,107 @@ export default function CalculatorPage() {
           <Tab label="Lumpsum" />
         </Tabs>
 
-        {/* Content area */}
-        <Grid container justifyContent="center">
-          <Grid item xs={12} sm={8} md={6}>
+        <Grid container>
+          <Grid item xs={12}>
             <Box
+              className="glass-card"
               sx={{
-                bgcolor: '#1e1e1e',
-                borderRadius: 4,
-                p: 4,
-                boxShadow: '0 0 10px rgba(255,122,0,0.2)',
+                p: { xs: 3, md: 5 },
+                background: 'rgba(26, 26, 26, 0.4)',
+                border: '1px solid rgba(255, 255, 255, 0.05)',
+                width: '100%'
               }}
             >
-              {tab === 0 && <SIPForm onCalculate={calculateSIP} />}
-              {tab === 1 && <SWPForm onCalculate={calculateSWP} />}
-              {tab === 2 && <StepUpSIPForm onCalculate={calculateStepUpSIP} />}
-              {tab === 3 && <StepUpSWPForm onCalculate={calculateStepUpSWP} />}
-              {tab === 4 && <LumpsumForm onCalculate={calculateLumpsum} />}
-
-              {/* Result + Charts */}
-              {result && chartData && (
-                <Box sx={{ mt: 5, textAlign: 'center' }}>
-                  <Typography variant="h6" sx={{ color: '#ffb347' }}>
-                    💰 Final Value: ₹{result}
-                  </Typography>
-                  <Typography sx={{ color: '#fff', mt: 1 }}>
-                    Invested: ₹{chartData.datasets[0].data[0].toFixed(2)} | Available Return: ₹{chartData.datasets[0].data[1].toFixed(2)}
-                  </Typography>
-
-                  <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3, flexWrap: 'wrap', gap: 3 }}>
-                    <Box sx={{ width: 200 }}>
-                      <Typography sx={{ color: '#fff', mb: 1 }}>Doughnut Chart</Typography>
-                      <Doughnut data={chartData} />
-                    </Box>
-                    <Box sx={{ width: 200 }}>
-                      <Typography sx={{ color: '#fff', mb: 1 }}>Pie Chart</Typography>
-                      <Pie data={chartData} />
-                    </Box>
+              <Grid container spacing={6} alignItems="center">
+                <Grid item xs={12} md={5}>
+                  <Box sx={{ p: 2 }}>
+                    <Typography variant="h5" sx={{ color: '#fff', fontWeight: 800, mb: 4, opacity: 0.9 }}>
+                      Input <span style={{ color: '#ff7a00' }}>Parameters</span>
+                    </Typography>
+                    {tab === 0 && <SIPForm onCalculate={calculateSIP} />}
+                    {tab === 1 && <SWPForm onCalculate={calculateSWP} />}
+                    {tab === 2 && <StepUpSIPForm onCalculate={calculateStepUpSIP} />}
+                    {tab === 3 && <StepUpSWPForm onCalculate={calculateStepUpSWP} />}
+                    {tab === 4 && <LumpsumForm onCalculate={calculateLumpsum} />}
                   </Box>
-                </Box>
-              )}
+                </Grid>
+
+                <Grid item xs={12} md={7}>
+                  {!result ? (
+                    <Box sx={{
+                      textAlign: 'center',
+                      opacity: 0.3,
+                      height: '100%',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      justifyContent: 'center',
+                      border: '2px dashed rgba(255,255,255,0.1)',
+                      borderRadius: 4,
+                      p: 4
+                    }}>
+                      <Typography variant="h4" sx={{ fontWeight: 800 }}>Simulation Results</Typography>
+                      <Typography sx={{ mt: 2 }}>Enter your investment details to see the growth projection.</Typography>
+                    </Box>
+                  ) : (
+                    <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+                      {/* Top Aligned Results Header */}
+                      <Box sx={{ textAlign: 'right', mb: 4 }}>
+                        <Typography variant="h2" sx={{ fontWeight: 900, color: '#ff7a00', mb: 0.5, letterSpacing: '-0.05em', lineHeight: 1.1 }}>
+                          ₹{Math.round(result).toLocaleString('en-IN')}
+                        </Typography>
+                        <Typography sx={{ color: 'rgba(255,255,255,0.5)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.2em', fontSize: '0.8rem' }}>
+                          Estimated Final Value
+                        </Typography>
+                      </Box>
+
+                      {/* Compact Summary Cards */}
+                      <Grid container spacing={2} sx={{ mb: 4 }}>
+                        <Grid item xs={6}>
+                          <Box sx={{ p: 2, bgcolor: 'rgba(255,255,255,0.03)', borderRadius: 2, border: '1px solid rgba(255,255,255,0.05)', textAlign: 'center' }}>
+                            <Typography variant="h6" sx={{ fontWeight: 900, color: '#4facfe' }}>
+                              ₹{Math.round(chartData.datasets[0].data[0]).toLocaleString('en-IN')}
+                            </Typography>
+                            <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.4)', fontWeight: 700 }}>Total Invested</Typography>
+                          </Box>
+                        </Grid>
+                        <Grid item xs={6}>
+                          <Box sx={{ p: 2, bgcolor: 'rgba(255,255,255,0.03)', borderRadius: 2, border: '1px solid rgba(255,255,255,0.05)', textAlign: 'center' }}>
+                            <Typography variant="h6" sx={{ fontWeight: 900, color: '#00f2fe' }}>
+                              ₹{Math.round(chartData.datasets[0].data[1]).toLocaleString('en-IN')}
+                            </Typography>
+                            <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.4)', fontWeight: 700 }}>Estimated Returns</Typography>
+                          </Box>
+                        </Grid>
+                      </Grid>
+
+                      {/* Fixed Height Chart Container */}
+                      <Box sx={{ width: '100%', mt: 'auto', display: 'flex', justifyContent: 'center' }}>
+                        <Box sx={{ width: '100%', height: { xs: 220, md: 280 }, position: 'relative' }}>
+                          <Doughnut
+                            data={chartData}
+                            options={{
+                              maintainAspectRatio: false,
+                              cutout: '75%',
+                              plugins: {
+                                legend: {
+                                  display: true,
+                                  position: 'bottom',
+                                  labels: {
+                                    color: 'rgba(255,255,255,0.7)',
+                                    padding: 15,
+                                    font: { weight: 'bold', size: 11 },
+                                    boxWidth: 10
+                                  }
+                                }
+                              }
+                            }}
+                          />
+                        </Box>
+                      </Box>
+                    </Box>
+                  )}
+                </Grid>
+              </Grid>
             </Box>
           </Grid>
         </Grid>
@@ -180,90 +258,110 @@ export default function CalculatorPage() {
   );
 }
 
-// -------------------- FORMS --------------------
+const inputStyle = {
+  mb: 3,
+  '& .MuiOutlinedInput-root': {
+    color: '#fff',
+    borderRadius: 3,
+    background: 'rgba(0,0,0,0.2)',
+    '& fieldset': { borderColor: 'rgba(255,255,255,0.1)' },
+    '&:hover fieldset': { borderColor: '#ff7a00' },
+    '&.Mui-focused fieldset': { borderColor: '#ff7a00' },
+  },
+  '& .MuiInputLabel-root': { color: 'rgba(255,255,255,0.5)' }
+};
+
+const buttonStyle = {
+  py: 2,
+  borderRadius: 3,
+  background: 'linear-gradient(135deg, #ff7a00, #ffb347)',
+  color: '#000',
+  fontWeight: 900,
+  fontSize: '1rem',
+  textTransform: 'none',
+  transition: 'all 0.3s ease',
+  boxShadow: '0 8px 25px rgba(255, 122, 0, 0.3)',
+  '&:hover': {
+    background: 'linear-gradient(135deg, #ffb347, #ff7a00)',
+    boxShadow: '0 12px 35px rgba(255, 122, 0, 0.5)',
+    filter: 'brightness(1.1)'
+  }
+};
 
 function SIPForm({ onCalculate }) {
-  const [amount, setAmount] = useState('');
-  const [rate, setRate] = useState('');
-  const [years, setYears] = useState('');
-
+  const [amount, setAmount] = useState('5000');
+  const [rate, setRate] = useState('12');
+  const [years, setYears] = useState('10');
   return (
     <Box>
-      <TextField fullWidth label="Monthly SIP Amount (₹)" variant="outlined" sx={inputStyle} value={amount} onChange={(e) => setAmount(e.target.value)} />
-      <TextField fullWidth label="Expected Annual Return (%)" variant="outlined" sx={inputStyle} value={rate} onChange={(e) => setRate(e.target.value)} />
-      <TextField fullWidth label="Investment Duration (Years)" variant="outlined" sx={inputStyle} value={years} onChange={(e) => setYears(e.target.value)} />
-      <Button fullWidth variant="contained" sx={buttonStyle} onClick={() => onCalculate(+amount, +rate, +years)}>Calculate</Button>
+      <TextField fullWidth label="Monthly SIP (₹)" sx={inputStyle} value={amount} onChange={(e) => setAmount(e.target.value)} />
+      <TextField fullWidth label="Annual Return (%)" sx={inputStyle} value={rate} onChange={(e) => setRate(e.target.value)} />
+      <TextField fullWidth label="Duration (Years)" sx={inputStyle} value={years} onChange={(e) => setYears(e.target.value)} />
+      <Button fullWidth variant="contained" sx={buttonStyle} onClick={() => onCalculate(+amount, +rate, +years)}>Simulate SIP</Button>
     </Box>
   );
 }
 
 function SWPForm({ onCalculate }) {
-  const [corpus, setCorpus] = useState('');
-  const [rate, setRate] = useState('');
-  const [years, setYears] = useState('');
-  const [withdrawal, setWithdrawal] = useState('');
-
+  const [corpus, setCorpus] = useState('1000000');
+  const [rate, setRate] = useState('8');
+  const [years, setYears] = useState('10');
+  const [withdrawal, setWithdrawal] = useState('5000');
   return (
     <Box>
-      <TextField fullWidth label="Initial Corpus (₹)" variant="outlined" sx={inputStyle} value={corpus} onChange={(e) => setCorpus(e.target.value)} />
-      <TextField fullWidth label="Expected Annual Return (%)" variant="outlined" sx={inputStyle} value={rate} onChange={(e) => setRate(e.target.value)} />
-      <TextField fullWidth label="Withdrawal per Month (₹)" variant="outlined" sx={inputStyle} value={withdrawal} onChange={(e) => setWithdrawal(e.target.value)} />
-      <TextField fullWidth label="Duration (Years)" variant="outlined" sx={inputStyle} value={years} onChange={(e) => setYears(e.target.value)} />
-      <Button fullWidth variant="contained" sx={buttonStyle} onClick={() => onCalculate(+corpus, +rate, +years, +withdrawal)}>Calculate</Button>
+      <TextField fullWidth label="Initial Corpus (₹)" sx={inputStyle} value={corpus} onChange={(e) => setCorpus(e.target.value)} />
+      <TextField fullWidth label="Annual Return (%)" sx={inputStyle} value={rate} onChange={(e) => setRate(e.target.value)} />
+      <TextField fullWidth label="Monthly Withdrawal (₹)" sx={inputStyle} value={withdrawal} onChange={(e) => setWithdrawal(e.target.value)} />
+      <TextField fullWidth label="Duration (Years)" sx={inputStyle} value={years} onChange={(e) => setYears(e.target.value)} />
+      <Button fullWidth variant="contained" sx={buttonStyle} onClick={() => onCalculate(+corpus, +rate, +years, +withdrawal)}>Simulate SWP</Button>
     </Box>
   );
 }
 
 function StepUpSIPForm({ onCalculate }) {
-  const [amount, setAmount] = useState('');
-  const [rate, setRate] = useState('');
-  const [years, setYears] = useState('');
-  const [stepUp, setStepUp] = useState('');
-
+  const [amount, setAmount] = useState('5000');
+  const [rate, setRate] = useState('12');
+  const [years, setYears] = useState('10');
+  const [stepUp, setStepUp] = useState('10');
   return (
     <Box>
-      <TextField fullWidth label="Monthly SIP (₹)" variant="outlined" sx={inputStyle} value={amount} onChange={(e) => setAmount(e.target.value)} />
-      <TextField fullWidth label="Expected Return (%)" variant="outlined" sx={inputStyle} value={rate} onChange={(e) => setRate(e.target.value)} />
-      <TextField fullWidth label="Duration (Years)" variant="outlined" sx={inputStyle} value={years} onChange={(e) => setYears(e.target.value)} />
-      <TextField fullWidth label="Step-Up % per Year" variant="outlined" sx={inputStyle} value={stepUp} onChange={(e) => setStepUp(e.target.value)} />
-      <Button fullWidth variant="contained" sx={buttonStyle} onClick={() => onCalculate(+amount, +rate, +years, +stepUp)}>Calculate</Button>
+      <TextField fullWidth label="Monthly SIP (₹)" sx={inputStyle} value={amount} onChange={(e) => setAmount(e.target.value)} />
+      <TextField fullWidth label="Expected Return (%)" sx={inputStyle} value={rate} onChange={(e) => setRate(e.target.value)} />
+      <TextField fullWidth label="Duration (Years)" sx={inputStyle} value={years} onChange={(e) => setYears(e.target.value)} />
+      <TextField fullWidth label="Step-Up % per Year" sx={inputStyle} value={stepUp} onChange={(e) => setStepUp(e.target.value)} />
+      <Button fullWidth variant="contained" sx={buttonStyle} onClick={() => onCalculate(+amount, +rate, +years, +stepUp)}>Simulate Step-Up</Button>
     </Box>
   );
 }
 
 function StepUpSWPForm({ onCalculate }) {
-  const [corpus, setCorpus] = useState('');
-  const [rate, setRate] = useState('');
-  const [years, setYears] = useState('');
-  const [withdrawal, setWithdrawal] = useState('');
-  const [stepUp, setStepUp] = useState('');
-
+  const [corpus, setCorpus] = useState('1000000');
+  const [rate, setRate] = useState('8');
+  const [years, setYears] = useState('10');
+  const [withdrawal, setWithdrawal] = useState('5000');
+  const [stepUp, setStepUp] = useState('5');
   return (
     <Box>
-      <TextField fullWidth label="Initial Corpus (₹)" variant="outlined" sx={inputStyle} value={corpus} onChange={(e) => setCorpus(e.target.value)} />
-      <TextField fullWidth label="Expected Return (%)" variant="outlined" sx={inputStyle} value={rate} onChange={(e) => setRate(e.target.value)} />
-      <TextField fullWidth label="Withdrawal (₹)" variant="outlined" sx={inputStyle} value={withdrawal} onChange={(e) => setWithdrawal(e.target.value)} />
-      <TextField fullWidth label="Duration (Years)" variant="outlined" sx={inputStyle} value={years} onChange={(e) => setYears(e.target.value)} />
-      <TextField fullWidth label="Step-Up % per Year" variant="outlined" sx={inputStyle} value={stepUp} onChange={(e) => setStepUp(e.target.value)} />
-      <Button fullWidth variant="contained" sx={buttonStyle} onClick={() => onCalculate(+corpus, +rate, +years, +withdrawal, +stepUp)}>Calculate</Button>
+      <TextField fullWidth label="Initial Corpus (₹)" sx={inputStyle} value={corpus} onChange={(e) => setCorpus(e.target.value)} />
+      <TextField fullWidth label="Expected Return (%)" sx={inputStyle} value={rate} onChange={(e) => setRate(e.target.value)} />
+      <TextField fullWidth label="Withdrawal (₹)" sx={inputStyle} value={withdrawal} onChange={(e) => setWithdrawal(e.target.value)} />
+      <TextField fullWidth label="Duration (Years)" sx={inputStyle} value={years} onChange={(e) => setYears(e.target.value)} />
+      <TextField fullWidth label="Step-Up % per Year" sx={inputStyle} value={stepUp} onChange={(e) => setStepUp(e.target.value)} />
+      <Button fullWidth variant="contained" sx={buttonStyle} onClick={() => onCalculate(+corpus, +rate, +years, +withdrawal, +stepUp)}>Simulate SWP Step-Up</Button>
     </Box>
   );
 }
 
 function LumpsumForm({ onCalculate }) {
-  const [amount, setAmount] = useState('');
-  const [rate, setRate] = useState('');
-  const [years, setYears] = useState('');
-
+  const [amount, setAmount] = useState('100000');
+  const [rate, setRate] = useState('12');
+  const [years, setYears] = useState('10');
   return (
     <Box>
-      <TextField fullWidth label="Investment Amount (₹)" variant="outlined" sx={inputStyle} value={amount} onChange={(e) => setAmount(e.target.value)} />
-      <TextField fullWidth label="Expected Return (%)" variant="outlined" sx={inputStyle} value={rate} onChange={(e) => setRate(e.target.value)} />
-      <TextField fullWidth label="Duration (Years)" variant="outlined" sx={inputStyle} value={years} onChange={(e) => setYears(e.target.value)} />
-      <Button fullWidth variant="contained" sx={buttonStyle} onClick={() => onCalculate(+amount, +rate, +years)}>Calculate</Button>
+      <TextField fullWidth label="Investment Amount (₹)" sx={inputStyle} value={amount} onChange={(e) => setAmount(e.target.value)} />
+      <TextField fullWidth label="Expected Return (%)" sx={inputStyle} value={rate} onChange={(e) => setRate(e.target.value)} />
+      <TextField fullWidth label="Duration (Years)" sx={inputStyle} value={years} onChange={(e) => setYears(e.target.value)} />
+      <Button fullWidth variant="contained" sx={buttonStyle} onClick={() => onCalculate(+amount, +rate, +years)}>Simulate Lumpsum</Button>
     </Box>
   );
 }
-
-const inputStyle = { mb: 2, input: { color: '#fff' }, '& .MuiInputLabel-root': { color: '#bdbdbd' }, '& .MuiOutlinedInput-root': { '& fieldset': { borderColor: '#555' } } };
-const buttonStyle = { mt: 2, bgcolor: '#ff7a00', '&:hover': { bgcolor: '#ff9800' } };

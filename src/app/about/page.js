@@ -6,101 +6,121 @@ import Footer from '../components/Footer';
 
 export default function AboutPage() {
   return (
-    <Box sx={{ bgcolor: '#0b0b0b', color: '#fff', minHeight: '100vh' }}>
+    <Box sx={{ minHeight: '100vh', position: 'relative', pt: 12 }}>
       <Header />
 
       {/* Intro */}
-      <Container sx={{ py: 10, textAlign: 'center', maxWidth: 800 }}>
+      <Container maxWidth="md" sx={{ py: 10, textAlign: 'center' }}>
         <Typography
-          variant="h4"
+          variant="h2"
           sx={{
-            mb: 4,
-            fontWeight: 700,
-            background: 'linear-gradient(90deg, #ff7a00, #ffb347)',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
+            fontWeight: 900,
+            color: '#fff',
+            mb: 3,
+            letterSpacing: '-0.03em'
           }}
         >
-          About FundExplorer
+          About <span style={{ color: '#ff7a00' }}>FundExplorer</span>
         </Typography>
 
-        <Typography variant="body1" sx={{ color: '#bdbdbd', mb: 3 }}>
-          FundExplorer is your one-stop destination for exploring and analyzing mutual funds. We
-          simplify complex investment data into easy insights so you can make confident, informed
-          decisions about your wealth.
+        <Typography variant="h6" sx={{ color: 'rgba(255, 255, 255, 0.6)', lineHeight: 1.8, fontWeight: 500 }}>
+          FundExplorer is a high-performance analytics platform designed to simplify
+          mutual fund investing. We bridge the gap between complex market data and
+          actionable financial insights.
         </Typography>
       </Container>
 
       {/* Mission & Vision */}
-      <Container sx={{ py: 6, textAlign: 'center' }}>
-        <Typography variant="h5" sx={{ fontWeight: 700, mb: 2 }}>
-          Our Mission
-        </Typography>
-        <Typography sx={{ color: '#bdbdbd', mb: 5, maxWidth: 700, mx: 'auto' }}>
-          To make investing accessible, transparent, and data-driven for everyone — from beginners
-          to professionals.
-        </Typography>
-
-        <Typography variant="h5" sx={{ fontWeight: 700, mb: 2 }}>
-          Our Vision
-        </Typography>
-        <Typography sx={{ color: '#bdbdbd', maxWidth: 700, mx: 'auto' }}>
-          Empowering investors to take control of their financial growth using AI-powered mutual
-          fund insights and easy-to-use tools.
-        </Typography>
+      <Container sx={{ py: 6 }}>
+        <Grid container spacing={4}>
+          <Grid item xs={12} md={6}>
+            <Box className="glass-card" sx={{ p: 6, height: '100%', borderLeft: '4px solid #ff7a00' }}>
+              <Typography variant="h4" sx={{ fontWeight: 900, mb: 3, color: '#fff' }}>
+                Our Mission
+              </Typography>
+              <Typography sx={{ color: 'rgba(255,255,255,0.6)', fontSize: '1.1rem', lineHeight: 1.8 }}>
+                To democratize financial intelligence by providing every investor with
+                enterprise-grade tools, real-time data transparency, and unbiased
+                fund analytics.
+              </Typography>
+            </Box>
+          </Grid>
+          <Grid item xs={12} md={6}>
+            <Box className="glass-card" sx={{ p: 6, height: '100%', borderLeft: '4px solid #ffb347' }}>
+              <Typography variant="h4" sx={{ fontWeight: 900, mb: 3, color: '#fff' }}>
+                Our Vision
+              </Typography>
+              <Typography sx={{ color: 'rgba(255,255,255,0.6)', fontSize: '1.1rem', lineHeight: 1.8 }}>
+                To become the global standard for mutual fund analysis, where data-driven
+                decisions replace guesswork, empowering a new generation of wealth builders.
+              </Typography>
+            </Box>
+          </Grid>
+        </Grid>
       </Container>
 
       {/* Features Section */}
-      <Container sx={{ py: 10 }}>
-        <Typography variant="h5" sx={{ textAlign: 'center', mb: 6, fontWeight: 700 }}>
-          Why <span style={{ color: '#ff7a00' }}>Choose FundExplorer</span>
+      <Container sx={{ py: 15 }}>
+        <Typography variant="h3" sx={{ textAlign: 'center', mb: 10, fontWeight: 900 }}>
+          Why <span style={{ color: '#ff7a00' }}>Trust Us</span>
         </Typography>
 
-        <Grid container spacing={4} justifyContent="center">
+        <Box
+          sx={{
+            display: 'grid',
+            gridTemplateColumns: {
+              xs: '1fr',
+              sm: 'repeat(2, 1fr)',
+              md: 'repeat(4, 1fr)'
+            },
+            gap: 3
+          }}
+        >
           {[
-            { icon: '📊', title: 'Data-Driven Insights', desc: 'Access real-time performance analytics for 5,000+ mutual funds.' },
-            { icon: '💡', title: 'Smart SIP Calculator', desc: 'Estimate your future wealth using historical NAV data.' },
-            { icon: '🔒', title: 'Safe & Secure', desc: 'Your financial data is protected with industry-standard encryption.' },
-            { icon: '🤝', title: 'Trusted by Investors', desc: 'Join thousands of users tracking and comparing funds daily.' },
+            { icon: '📊', title: 'Live Data', desc: 'Real-time performance sync from primary market sources.' },
+            { icon: '💡', title: 'Simulations', desc: 'Advanced algorithms to predict future wealth growth.' },
+            { icon: '🔒', title: 'Privacy First', desc: 'Cloud-native security for your financial watchlist.' },
+            { icon: '🤝', title: 'Expert Picks', desc: 'Data-backed fund rankings updated daily.' },
           ].map((feature, idx) => (
-            <Grid item xs={12} sm={6} md={3} key={idx}>
-              <Box
-                sx={{
-                  p: 4,
-                  bgcolor: '#1e1e1e',
-                  borderRadius: 4,
-                  textAlign: 'center',
-                  transition: '0.3s',
-                  '&:hover': {
-                    transform: 'translateY(-5px)',
-                    boxShadow: '0px 8px 25px rgba(255, 122, 0, 0.2)',
-                  },
-                }}
-              >
-                <Typography sx={{ fontSize: 40 }}>{feature.icon}</Typography>
-                <Typography variant="h6" sx={{ mt: 2, mb: 1, fontWeight: 600 }}>
-                  {feature.title}
-                </Typography>
-                <Typography sx={{ color: '#bdbdbd' }}>{feature.desc}</Typography>
-              </Box>
-            </Grid>
+            <Box
+              key={idx}
+              className="glass-card"
+              sx={{
+                p: 4,
+                textAlign: 'center',
+                display: 'flex',
+                flexDirection: 'column',
+                height: '100%',
+                '&:hover': {
+                  borderColor: '#ff7a00',
+                  transform: 'translateY(-10px)'
+                }
+              }}
+            >
+              <Typography sx={{ fontSize: 48, mb: 2 }}>{feature.icon}</Typography>
+              <Typography variant="h6" sx={{ mb: 2, fontWeight: 800, color: '#fff' }}>
+                {feature.title}
+              </Typography>
+              <Typography sx={{ color: 'rgba(255,255,255,0.5)', lineHeight: 1.6 }}>{feature.desc}</Typography>
+            </Box>
           ))}
-        </Grid>
+        </Box>
       </Container>
 
       {/* Final Message */}
       <Box
         sx={{
-          py: 6,
+          py: 12,
           textAlign: 'center',
-          background: 'linear-gradient(90deg, #ff7a00, #ffb347)',
-          color: '#000',
+          background: 'linear-gradient(135deg, rgba(255, 122, 0, 0.2), transparent)',
+          borderY: '1px solid rgba(255, 255, 255, 0.05)',
+          mb: 10
         }}
       >
-        <Typography variant="h6" sx={{ fontWeight: 700 }}>
+        <Typography variant="h4" sx={{ fontWeight: 900, mb: 3 }}>
           Join the FundExplorer Community Today!
         </Typography>
-        <Typography variant="body1">
+        <Typography variant="h6" sx={{ color: 'rgba(255,255,255,0.6)', maxWidth: 600, mx: 'auto', mb: 5 }}>
           Take your first step towards smarter and more confident mutual fund investing.
         </Typography>
       </Box>

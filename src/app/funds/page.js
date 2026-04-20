@@ -22,11 +22,13 @@ export default function FundsPage() {
   const [sortOrder, setSortOrder] = useState('name_asc');
   const [watchlist, setWatchlist] = useState([]);
   const [error, setError] = useState('');
+  const [mounted, setMounted] = useState(false);
 
   const fundsPerPage = 12; // Match active-funds (3 rows * 4 per row)
 
   // Load watchlist
   useEffect(() => {
+    setMounted(true);
     const stored = localStorage.getItem('watchlist');
     if (stored) setWatchlist(JSON.parse(stored));
   }, []);
@@ -45,8 +47,19 @@ export default function FundsPage() {
         if (!res.ok) throw new Error('Failed to fetch funds');
         const data = await res.json();
         const allFunds = Array.isArray(data) ? data : (data.data || []);
-        setFunds(allFunds);
-        setFilteredFunds(allFunds);
+
+        // Fix for duplicate key error: Deduplicate by schemeCode
+        const uniqueFunds = [];
+        const seen = new Set();
+        for (const fund of allFunds) {
+          if (fund.schemeCode && !seen.has(fund.schemeCode)) {
+            seen.add(fund.schemeCode);
+            uniqueFunds.push(fund);
+          }
+        }
+
+        setFunds(uniqueFunds);
+        setFilteredFunds(uniqueFunds);
       } catch (err) {
         console.error(err);
         setError(err.message);
@@ -84,81 +97,100 @@ export default function FundsPage() {
     }
   };
 
-  if (loading) return (
-    <Container sx={{ py: 10, textAlign: 'center' }}>
+  if (!mounted || loading) return (
+    <Box sx={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column' }}>
       <CircularProgress color="warning" />
       <Typography variant="h6" sx={{ mt: 2, color: '#ffb347' }}>
         Loading Mutual Funds...
       </Typography>
-    </Container>
+    </Box>
   );
 
   if (error) return (
-    <Container sx={{ py: 10, textAlign: 'center' }}>
+    <Box sx={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
       <Typography variant="h6" color="error">
         {error}
       </Typography>
-    </Container>
+    </Box>
   );
 
   return (
-    <Box sx={{ background: '#0d0d0d', minHeight: '100vh' }}>
+    <Box sx={{ minHeight: '100vh', position: 'relative', pt: 12 }}>
       <Header />
 
       <Container maxWidth="xl" sx={{ py: 6 }}>
-        <Typography
-          variant="h3"
-          align="center"
-          gutterBottom
-          sx={{ color: '#ffb347', fontWeight: 'bold', mb: 1 }}
-        >
-          Mutual Funds Explorer
-        </Typography>
-        <Typography variant="body1" align="center" sx={{ color: '#ccc', mb: 2 }}>
-          Found {filteredFunds.length} schemes
-        </Typography>
+        <Box sx={{ textAlign: 'center', mb: 10 }}>
+          <Typography
+            variant="h2"
+            sx={{
+              fontWeight: 900,
+              color: '#fff',
+              mb: 2,
+              letterSpacing: '-0.03em'
+            }}
+          >
+            Mutual Funds <span style={{ color: '#ff7a00' }}>Explorer</span>
+          </Typography>
+          <Typography variant="h6" sx={{ color: 'rgba(255, 255, 255, 0.6)', maxWidth: 600, mx: 'auto', fontWeight: 500 }}>
+            Discover and analyze {filteredFunds.length} schemes with real-time insights and professional data.
+          </Typography>
+        </Box>
 
         {funds.length > 0 && funds.length <= 30 && (
-          <Box sx={{ mb: 4, p: 2, bgcolor: 'rgba(255, 179, 71, 0.1)', border: '1px solid #ffb347', borderRadius: 2, textAlign: 'center' }}>
-            <Typography variant="body2" sx={{ color: '#ffb347', fontWeight: 'bold' }}>
+          <Box className="glass-card" sx={{ mb: 6, p: 2, border: '1px solid #ff7a0033', textAlign: 'center' }}>
+            <Typography variant="body2" sx={{ color: '#ffb347', fontWeight: 800 }}>
               ⚠️ External API (mfapi.in) is currently down. Showing {funds.length} popular fallback funds for preview.
             </Typography>
           </Box>
         )}
 
-        <Paper elevation={3} sx={{ p: 3, mb: 5, borderRadius: 3, background: '#1a1a1a', color: '#fff', border: '1px solid #333' }}>
+        <Box
+          className="glass-card"
+          sx={{
+            p: 4,
+            mb: 8,
+            borderRadius: 6,
+            background: 'rgba(255, 255, 255, 0.02)',
+            border: '1px solid rgba(255, 255, 255, 0.05)'
+          }}
+        >
           <Grid container spacing={3} alignItems="center">
             <Grid item xs={12} md={8}>
               <TextField
                 fullWidth
-                label="Search by Scheme Name"
+                placeholder="Search by Scheme Name..."
                 variant="outlined"
                 value={search}
                 onChange={e => setSearch(e.target.value)}
                 InputProps={{
-                  startAdornment: <SearchIcon sx={{ mr: 1, color: '#ffb347' }} />,
+                  startAdornment: <SearchIcon sx={{ mr: 2, color: '#ff7a00' }} />,
                 }}
-                InputLabelProps={{ style: { color: '#ffb347' } }}
                 sx={{
                   '& .MuiOutlinedInput-root': {
                     color: '#fff',
-                    '& fieldset': { borderColor: '#444' },
-                    '&:hover fieldset': { borderColor: '#ffb347' },
+                    borderRadius: 4,
+                    background: 'rgba(0,0,0,0.2)',
+                    '& fieldset': { borderColor: 'rgba(255,255,255,0.1)' },
+                    '&:hover fieldset': { borderColor: '#ff7a00' },
+                    '&.Mui-focused fieldset': { borderColor: '#ff7a00' },
                   },
                 }}
               />
             </Grid>
             <Grid item xs={12} md={4}>
               <FormControl fullWidth>
-                <InputLabel sx={{ color: '#ffb347' }}>Sort By</InputLabel>
+                <InputLabel sx={{ color: 'rgba(255,255,255,0.5)' }}>Sort By</InputLabel>
                 <Select
                   value={sortOrder}
                   label="Sort By"
                   onChange={e => setSortOrder(e.target.value)}
                   sx={{
                     color: '#fff',
-                    '.MuiOutlinedInput-notchedOutline': { borderColor: '#444' },
-                    '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: '#ffb347' },
+                    borderRadius: 4,
+                    background: 'rgba(0,0,0,0.2)',
+                    '.MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(255,255,255,0.1)' },
+                    '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: '#ff7a00' },
+                    '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: '#ff7a00' },
                   }}
                 >
                   <MenuItem value="name_asc">Scheme Name (A-Z)</MenuItem>
@@ -167,50 +199,82 @@ export default function FundsPage() {
               </FormControl>
             </Grid>
           </Grid>
-        </Paper>
+        </Box>
 
-        <Grid container spacing={3}>
+        <Box
+          sx={{
+            display: 'grid',
+            gridTemplateColumns: {
+              xs: '1fr',
+              sm: 'repeat(2, 1fr)',
+              lg: 'repeat(3, 1fr)',
+              xl: 'repeat(4, 1fr)'
+            },
+            gap: 3
+          }}
+        >
           {currentFunds.map(s => (
-            <Grid item xs={6} md={6} key={s.schemeCode}>
-              <Card sx={{
+            <Card
+              key={s.schemeCode}
+              className="glass-card"
+              sx={{
                 height: '100%',
                 display: 'flex',
                 flexDirection: 'column',
                 justifyContent: 'space-between',
-                background: '#1a1a1a',
+                background: 'rgba(26, 26, 26, 0.6)',
+                backdropFilter: 'blur(10px)',
                 color: '#fff',
-                borderRadius: 3,
-                border: '1px solid #2a2a2a',
+                borderRadius: 4,
+                border: '1px solid rgba(255, 255, 255, 0.05)',
                 transition: '0.3s',
-                '&:hover': { transform: 'translateY(-6px)', boxShadow: '0 6px 18px rgba(255, 179, 71, 0.25)', borderColor: '#ffb347' },
-              }}>
-                <CardContent sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                  <Box sx={{ overflow: 'hidden', mr: 1 }}>
-                    <Typography variant="subtitle1" noWrap title={s.schemeName} sx={{ color: '#ffb347', fontWeight: 600, mb: 0.5 }}>
-                      {s.schemeName}
-                    </Typography>
-                    <Typography variant="caption" sx={{ color: '#aaa' }}>
-                      Scheme Code: {s.schemeCode}
-                    </Typography>
-                  </Box>
-                  <IconButton onClick={() => toggleWatchlist(s)} size="small">
-                    {watchlist.find(w => w.schemeCode === s.schemeCode) ? (
-                      <StarIcon color="warning" />
-                    ) : (
-                      <StarBorderIcon sx={{ color: '#ffb347' }} />
-                    )}
-                  </IconButton>
-                </CardContent>
-                <Box sx={{ p: 2, pt: 0 }}>
-                  <Button component={Link} href={`/scheme/${s.schemeCode}`} variant="contained" fullWidth
-                    sx={{ background: '#ffb347', color: '#0b0b0b', fontWeight: 'bold', borderRadius: 2, '&:hover': { background: '#ffaa47' } }}>
-                    VIEW DETAILS
-                  </Button>
+                '&:hover': {
+                  transform: 'translateY(-6px)',
+                  boxShadow: '0 10px 30px rgba(255, 179, 71, 0.15)',
+                  borderColor: '#ffb347'
+                },
+              }}
+            >
+              <CardContent sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', p: 3 }}>
+                <Box sx={{ overflow: 'hidden', mr: 1 }}>
+                  <Typography variant="subtitle1" sx={{ color: '#ffb347', fontWeight: 800, mb: 1, lineHeight: 1.3 }}>
+                    {s.schemeName}
+                  </Typography>
+                  <Typography variant="caption" sx={{ color: 'rgba(255, 255, 255, 0.5)', fontWeight: 600 }}>
+                    CODE: {s.schemeCode}
+                  </Typography>
                 </Box>
-              </Card>
-            </Grid>
+                <IconButton onClick={() => toggleWatchlist(s)} size="small" sx={{ mt: -0.5 }}>
+                  {watchlist.find(w => w.schemeCode === s.schemeCode) ? (
+                    <StarIcon sx={{ color: '#ff7a00' }} />
+                  ) : (
+                    <StarBorderIcon sx={{ color: 'rgba(255, 255, 255, 0.3)' }} />
+                  )}
+                </IconButton>
+              </CardContent>
+              <Box sx={{ p: 3, pt: 0 }}>
+                <Button component={Link} href={`/scheme/${s.schemeCode}`} variant="contained" fullWidth
+                  sx={{
+                    background: 'linear-gradient(135deg, #ff7a00, #ffb347)',
+                    color: '#000',
+                    fontWeight: 900,
+                    borderRadius: 3,
+                    py: 1.2,
+                    textTransform: 'none',
+                    fontSize: '0.95rem',
+                    transition: 'all 0.3s ease',
+                    '&:hover': {
+                      background: 'linear-gradient(135deg, #ffb347, #ff7a00)',
+                      filter: 'brightness(1.1)',
+                      boxShadow: '0 8px 25px rgba(255, 122, 0, 0.4)'
+                    }
+                  }}>
+                  View Details
+                </Button>
+              </Box>
+            </Card>
           ))}
-        </Grid>
+        </Box>
 
         {filteredFunds.length === 0 && (
           <Box textAlign="center" py={10}>
