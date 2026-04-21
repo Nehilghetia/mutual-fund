@@ -15,7 +15,7 @@ export default function TermsPage() {
                 <Box className="glass-card" sx={{ p: 6, color: 'rgba(255,255,255,0.7)', lineHeight: 1.8 }}>
                     <Typography variant="h5" sx={{ color: '#fff', mb: 2, fontWeight: 700 }}>1. Acceptance of Terms</Typography>
                     <Typography sx={{ mb: 4 }}>
-                        By accessing FundExplorer, you agree to comply with these terms. The platform is provided "as-is" for informational purposes only.
+                        By accessing FundExplorer, you agree to comply with these terms. The platform is provided &quot;as-is&quot; for informational purposes only.
                     </Typography>
 
                     <Typography variant="h5" sx={{ color: '#fff', mb: 2, fontWeight: 700 }}>2. Not Financial Advice</Typography>
