@@ -93,6 +93,12 @@ export default function CalculatorPage() {
     setChartData(makeChartData(amount, maturity));
   };
 
+  const calculateRetirement = (age, retireAge, expenses, returns) => {
+    const data = calculateRetirementLogic(age, retireAge, expenses, returns);
+    setResult(data);
+    setChartData(makeChartData(expenses * 12 * (retireAge - age), data.corpus));
+  };
+
   // ---- Helper Chart Data Function ----
   const makeChartData = (invested, totalValue) => {
     const availableReturn = totalValue - invested;
@@ -146,6 +152,7 @@ export default function CalculatorPage() {
           <Tab label="Step-Up SIP" />
           <Tab label="Step-Up SWP" />
           <Tab label="Lumpsum" />
+          <Tab label="Retirement" />
         </Tabs>
 
         <Grid container>
@@ -170,6 +177,7 @@ export default function CalculatorPage() {
                     {tab === 2 && <StepUpSIPForm onCalculate={calculateStepUpSIP} />}
                     {tab === 3 && <StepUpSWPForm onCalculate={calculateStepUpSWP} />}
                     {tab === 4 && <LumpsumForm onCalculate={calculateLumpsum} />}
+                    {tab === 5 && <RetirementForm onCalculate={calculateRetirement} />}
                   </Box>
                 </Grid>
 
@@ -193,33 +201,50 @@ export default function CalculatorPage() {
                     <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
                       {/* Top Aligned Results Header */}
                       <Box sx={{ textAlign: 'right', mb: 4 }}>
-                        <Typography variant="h2" sx={{ fontWeight: 900, color: '#ff7a00', mb: 0.5, letterSpacing: '-0.05em', lineHeight: 1.1 }}>
-                          ₹{Math.round(result).toLocaleString('en-IN')}
-                        </Typography>
-                        <Typography sx={{ color: 'rgba(255,255,255,0.5)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.2em', fontSize: '0.8rem' }}>
-                          Estimated Final Value
-                        </Typography>
+                        {tab === 5 ? (
+                          <>
+                            <Typography variant="h5" sx={{ color: 'rgba(255,255,255,0.6)', fontWeight: 800 }}>REQUIRED SIP</Typography>
+                            <Typography variant="h2" sx={{ fontWeight: 900, color: '#ff7a00', mb: 2, letterSpacing: '-0.05em', lineHeight: 1.1 }}>
+                              ₹{Math.round(result.monthlySIP).toLocaleString('en-IN')}
+                            </Typography>
+                            <Typography variant="h5" sx={{ color: 'rgba(255,255,255,0.6)', fontWeight: 800 }}>TARGET CORPUS</Typography>
+                            <Typography variant="h3" sx={{ fontWeight: 900, color: '#fff', letterSpacing: '-0.05em' }}>
+                              ₹{Math.round(result.corpus).toLocaleString('en-IN')}
+                            </Typography>
+                          </>
+                        ) : (
+                          <>
+                            <Typography variant="h2" sx={{ fontWeight: 900, color: '#ff7a00', mb: 0.5, letterSpacing: '-0.05em', lineHeight: 1.1 }}>
+                              ₹{Math.round(result).toLocaleString('en-IN')}
+                            </Typography>
+                            <Typography sx={{ color: 'rgba(255,255,255,0.5)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.2em', fontSize: '0.8rem' }}>
+                              Estimated Final Value
+                            </Typography>
+                          </>
+                        )}
                       </Box>
 
-                      {/* Compact Summary Cards */}
-                      <Grid container spacing={2} sx={{ mb: 4 }}>
-                        <Grid item xs={6}>
-                          <Box sx={{ p: 2, bgcolor: 'rgba(255,255,255,0.03)', borderRadius: 2, border: '1px solid rgba(255,255,255,0.05)', textAlign: 'center' }}>
-                            <Typography variant="h6" sx={{ fontWeight: 900, color: '#4facfe' }}>
-                              ₹{Math.round(chartData.datasets[0].data[0]).toLocaleString('en-IN')}
-                            </Typography>
-                            <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.4)', fontWeight: 700 }}>Total Invested</Typography>
-                          </Box>
+                      {/* Summary Cards */}
+                      {tab !== 5 && (
+                        <Grid container spacing={2} sx={{ mb: 4 }}>
+                          <Grid item xs={6}>
+                            <Box sx={{ p: 2, bgcolor: 'rgba(255,255,255,0.03)', borderRadius: 2, border: '1px solid rgba(255,255,255,0.05)', textAlign: 'center' }}>
+                              <Typography variant="h6" sx={{ fontWeight: 900, color: '#4facfe' }}>
+                                ₹{Math.round(chartData.datasets[0].data[0]).toLocaleString('en-IN')}
+                              </Typography>
+                              <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.4)', fontWeight: 700 }}>Total Invested</Typography>
+                            </Box>
+                          </Grid>
+                          <Grid item xs={6}>
+                            <Box sx={{ p: 2, bgcolor: 'rgba(255,255,255,0.03)', borderRadius: 2, border: '1px solid rgba(255,255,255,0.05)', textAlign: 'center' }}>
+                              <Typography variant="h6" sx={{ fontWeight: 900, color: '#00f2fe' }}>
+                                ₹{Math.round(chartData.datasets[0].data[1]).toLocaleString('en-IN')}
+                              </Typography>
+                              <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.4)', fontWeight: 700 }}>Estimated Returns</Typography>
+                            </Box>
+                          </Grid>
                         </Grid>
-                        <Grid item xs={6}>
-                          <Box sx={{ p: 2, bgcolor: 'rgba(255,255,255,0.03)', borderRadius: 2, border: '1px solid rgba(255,255,255,0.05)', textAlign: 'center' }}>
-                            <Typography variant="h6" sx={{ fontWeight: 900, color: '#00f2fe' }}>
-                              ₹{Math.round(chartData.datasets[0].data[1]).toLocaleString('en-IN')}
-                            </Typography>
-                            <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.4)', fontWeight: 700 }}>Estimated Returns</Typography>
-                          </Box>
-                        </Grid>
-                      </Grid>
+                      )}
 
                       {/* Fixed Height Chart Container */}
                       <Box sx={{ width: '100%', mt: 'auto', display: 'flex', justifyContent: 'center' }}>
@@ -365,3 +390,45 @@ function LumpsumForm({ onCalculate }) {
     </Box>
   );
 }
+
+function RetirementForm({ onCalculate }) {
+  const [age, setAge] = useState('30');
+  const [retireAge, setRetireAge] = useState('60');
+  const [expenses, setExpenses] = useState('50000');
+  const [returns, setReturns] = useState('12');
+
+  return (
+    <Box>
+      <TextField fullWidth label="Current Age" sx={inputStyle} value={age} onChange={(e) => setAge(e.target.value)} />
+      <TextField fullWidth label="Planning to Retire at" sx={inputStyle} value={retireAge} onChange={(e) => setRetireAge(e.target.value)} />
+      <TextField fullWidth label="Monthly Expenses (Today, ₹)" sx={inputStyle} value={expenses} onChange={(e) => setExpenses(e.target.value)} />
+      <TextField fullWidth label="Expected Returns (%)" sx={inputStyle} value={returns} onChange={(e) => setReturns(e.target.value)} />
+      <Button fullWidth variant="contained" sx={buttonStyle} onClick={() => onCalculate(+age, +retireAge, +expenses, +returns)}>Plan Retirement</Button>
+    </Box>
+  );
+}
+
+// ---- MATH LOGIC EXTENSION ----
+const calculateRetirementLogic = (age, retireAge, currentExpenses, preReturns) => {
+  const inflation = 6; // Fixed 6% inflation
+  const postReturns = 8; // Fixed 8% post-retirement returns
+  const lifeExpec = 85; // Fixed 85 years life expectancy
+
+  const yearsToRetire = retireAge - age;
+  const yearsInRetire = lifeExpec - retireAge;
+
+  // Inflation adjusted monthly expenses at retirement
+  const monthlyExpensesAtRetire = currentExpenses * Math.pow(1 + inflation / 100, yearsToRetire);
+
+  // Corpus needed using Annuity factor (simplification)
+  const rDay = (postReturns - inflation) / 100 / 12;
+  const nMonths = yearsInRetire * 12;
+  const corpusNeeded = monthlyExpensesAtRetire * ((1 - Math.pow(1 + rDay, -nMonths)) / rDay);
+
+  // SIP needed to reach that corpus
+  const rSIP = preReturns / 100 / 12;
+  const sipMonths = yearsToRetire * 12;
+  const requiredSIP = corpusNeeded / (((Math.pow(1 + rSIP, sipMonths) - 1) / rSIP) * (1 + rSIP));
+
+  return { corpus: corpusNeeded, monthlySIP: requiredSIP };
+};

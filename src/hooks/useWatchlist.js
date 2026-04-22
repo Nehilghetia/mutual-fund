@@ -3,19 +3,27 @@ import { useState, useEffect } from 'react';
 
 export default function useWatchlist() {
   const [watchlist, setWatchlist] = useState([]);
+  const [isLoaded, setIsLoaded] = useState(false);
 
   // Load from localStorage
   useEffect(() => {
     const saved = localStorage.getItem('watchlist');
     if (saved) {
-      setWatchlist(JSON.parse(saved));
+      try {
+        setWatchlist(JSON.parse(saved));
+      } catch (e) {
+        console.error("Failed to parse watchlist", e);
+      }
     }
+    setIsLoaded(true);
   }, []);
 
-  // Save to localStorage whenever updated
+  // Save to localStorage whenever updated (ONLY after first load)
   useEffect(() => {
-    localStorage.setItem('watchlist', JSON.stringify(watchlist));
-  }, [watchlist]);
+    if (isLoaded) {
+      localStorage.setItem('watchlist', JSON.stringify(watchlist));
+    }
+  }, [watchlist, isLoaded]);
 
   // Add or remove fund
   const toggleWatchlist = (fund) => {

@@ -7,6 +7,7 @@ import Link from 'next/link';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import useWatchlist from '@/hooks/useWatchlist';
+import { getEnhancedFundDetails } from '../utils/fundDetails';
 
 export default function WatchlistPage() {
   const { watchlist, toggleWatchlist } = useWatchlist();
@@ -72,64 +73,88 @@ export default function WatchlistPage() {
               gap: 3
             }}
           >
-            {watchlist.map((s) => (
-              <Card
-                key={s.schemeCode}
-                className="glass-card"
-                sx={{
-                  height: '100%',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  justifyContent: 'space-between',
-                  background: 'rgba(26, 26, 26, 0.6)',
-                  backdropFilter: 'blur(10px)',
-                  color: '#fff',
-                  borderRadius: 4,
-                  border: '1px solid rgba(255, 255, 255, 0.05)',
-                  transition: '0.3s',
-                  '&:hover': {
-                    transform: 'translateY(-6px)',
-                    boxShadow: '0 10px 30px rgba(255, 179, 71, 0.15)',
-                    borderColor: '#ffb347'
-                  },
-                }}
-              >
-                <CardContent sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', p: 3 }}>
-                  <Box sx={{ overflow: 'hidden', mr: 1 }}>
-                    <Typography variant="subtitle1" sx={{ color: '#ffb347', fontWeight: 800, mb: 1, lineHeight: 1.3 }}>
-                      {s.schemeName}
-                    </Typography>
-                    <Typography variant="caption" sx={{ color: 'rgba(255, 255, 255, 0.5)', fontWeight: 600 }}>
-                      CODE: {s.schemeCode}
-                    </Typography>
-                  </Box>
-                  <IconButton onClick={() => toggleWatchlist(s)} size="small" sx={{ mt: -0.5 }}>
-                    <StarIcon sx={{ color: '#ff7a00' }} />
-                  </IconButton>
-                </CardContent>
-                <Box sx={{ p: 3, pt: 0 }}>
-                  <Button component={Link} href={`/scheme/${s.schemeCode}`} variant="contained" fullWidth
-                    sx={{
-                      background: 'linear-gradient(135deg, #ff7a00, #ffb347)',
-                      color: '#000',
-                      fontWeight: 900,
-                      borderRadius: 3,
-                      py: 1.2,
-                      textTransform: 'none',
-                      fontSize: '0.95rem',
-                      transition: 'all 0.3s ease',
-                      '&:hover': {
-                        background: 'linear-gradient(135deg, #ffb347, #ff7a00)',
-                        filter: 'brightness(1.1)',
-                        boxShadow: '0 8px 25px rgba(255, 122, 0, 0.4)'
-                      }
-                    }}
-                  >
-                    View Details
-                  </Button>
-                </Box>
-              </Card>
-            ))}
+            {watchlist.map((s) => {
+              const details = getEnhancedFundDetails(s.schemeCode);
+              return (
+                <Card
+                  key={s.schemeCode}
+                  className="glass-card"
+                  sx={{
+                    height: '100%',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'space-between',
+                    background: 'rgba(26, 26, 26, 0.6)',
+                    backdropFilter: 'blur(10px)',
+                    color: '#fff',
+                    borderRadius: 4,
+                    border: '1px solid rgba(255, 255, 255, 0.05)',
+                    transition: '0.3s',
+                    '&:hover': {
+                      transform: 'translateY(-6px)',
+                      boxShadow: '0 10px 30px rgba(255, 179, 71, 0.15)',
+                      borderColor: '#ffb347'
+                    },
+                  }}
+                >
+                  <CardContent sx={{ p: 3 }}>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 3 }}>
+                      <Box sx={{ overflow: 'hidden', mr: 1 }}>
+                        <Typography variant="subtitle1" sx={{ color: '#fff', fontWeight: 900, mb: 1, lineHeight: 1.3, height: '2.6em', overflow: 'hidden' }}>
+                          {s.schemeName}
+                        </Typography>
+                        <Typography variant="caption" sx={{ color: 'rgba(255, 255, 255, 0.4)', fontWeight: 700, letterSpacing: 0.5 }}>
+                          CODE: {s.schemeCode}
+                        </Typography>
+                      </Box>
+                      <IconButton onClick={() => toggleWatchlist(s)} size="small" sx={{ mt: -0.5, color: '#ff7a00' }}>
+                        <StarIcon />
+                      </IconButton>
+                    </Box>
+
+                    <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2, mb: 3 }}>
+                      <Box>
+                        <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.4)', display: 'block', fontWeight: 700 }}>LATEST NAV</Typography>
+                        <Typography variant="body1" sx={{ fontWeight: 900, color: '#fff' }}>₹{details.nav}</Typography>
+                      </Box>
+                      <Box>
+                        <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.4)', display: 'block', fontWeight: 700 }}>1Y RETURN</Typography>
+                        <Typography variant="body1" sx={{ fontWeight: 900, color: parseFloat(details.oneYearReturn) >= 0 ? '#4caf50' : '#f44336' }}>
+                          {parseFloat(details.oneYearReturn) >= 0 ? '+' : ''}{details.oneYearReturn}%
+                        </Typography>
+                      </Box>
+                      <Box>
+                        <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.4)', display: 'block', fontWeight: 700 }}>RISK RATING</Typography>
+                        <Typography variant="body2" sx={{ fontWeight: 800, color: '#ffb347' }}>{details.riskRating}</Typography>
+                      </Box>
+                      <Box>
+                        <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.4)', display: 'block', fontWeight: 700 }}>EXP. RATIO</Typography>
+                        <Typography variant="body2" sx={{ fontWeight: 800, color: '#fff' }}>{details.expenseRatio}%</Typography>
+                      </Box>
+                    </Box>
+
+                    <Button component={Link} href={`/scheme/${s.schemeCode}`} variant="contained" fullWidth
+                      sx={{
+                        background: 'linear-gradient(135deg, #ff7a00, #ffb347)',
+                        color: '#000',
+                        fontWeight: 900,
+                        borderRadius: 3,
+                        py: 1.2,
+                        textTransform: 'none',
+                        fontSize: '0.95rem',
+                        transition: 'all 0.3s ease',
+                        '&:hover': {
+                          background: 'linear-gradient(135deg, #ffb347, #ff7a00)',
+                          boxShadow: '0 8px 25px rgba(255, 122, 0, 0.4)'
+                        }
+                      }}
+                    >
+                      View Details
+                    </Button>
+                  </CardContent>
+                </Card>
+              );
+            })}
           </Box>
         )}
       </Container>

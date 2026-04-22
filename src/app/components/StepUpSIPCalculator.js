@@ -1,77 +1,128 @@
 'use client';
-import { useState } from 'react';
-import { Box, TextField, Button, Typography } from '@mui/material';
+import { useState, useEffect } from 'react';
+import { Box, Typography, Slider, Grid, Paper } from '@mui/material';
+import { Doughnut } from 'react-chartjs-2';
+import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
 
-export default function StepUpSIPCalculator({ navs }) {
-  const [monthly, setMonthly] = useState(1000);
-  const [annualReturn, setAnnualReturn] = useState(12);
-  const [years, setYears] = useState(5);
-  const [stepUp, setStepUp] = useState(10); // step-up percentage per year
-  const [futureValue, setFutureValue] = useState(null);
+ChartJS.register(ArcElement, Tooltip, Legend);
 
-  const calculateStepUpSIP = () => {
-    const r = annualReturn / 100 / 12; // monthly rate
-    let fv = 0;
-    let currentSIP = parseFloat(monthly);
+export default function StepUpSIPCalculator() {
+  const [amount, setAmount] = useState(5000);
+  const [rate, setRate] = useState(12);
+  const [years, setYears] = useState(10);
+  const [stepUp, setStepUp] = useState(10);
 
-    for (let year = 0; year < years; year++) {
-      for (let month = 0; month < 12; month++) {
-        fv = fv * (1 + r) + currentSIP;
+  const [stats, setStats] = useState({
+    invested: 0,
+    returns: 0,
+    total: 0
+  });
+
+  useEffect(() => {
+    const monthlyRate = rate / 12 / 100;
+    let totalInvested = 0;
+    let currentTotal = 0;
+    let currentSIP = amount;
+
+    for (let year = 1; year <= years; year++) {
+      for (let month = 1; month <= 12; month++) {
+        currentTotal = (currentTotal + currentSIP) * (1 + monthlyRate);
+        totalInvested += currentSIP;
       }
-      currentSIP = currentSIP * (1 + stepUp / 100); // increase SIP annually
+      currentSIP = currentSIP * (1 + stepUp / 100);
     }
 
-    setFutureValue(fv);
+    setStats({
+      invested: totalInvested,
+      returns: currentTotal - totalInvested,
+      total: currentTotal
+    });
+  }, [amount, rate, years, stepUp]);
+
+  const chartData = {
+    labels: ['Invested', 'Returns'],
+    datasets: [{
+      data: [stats.invested, stats.returns],
+      backgroundColor: ['#ff9800', '#4caf50'],
+      borderWidth: 0,
+      hoverOffset: 12
+    }]
+  };
+
+  const sliderStyle = {
+    color: '#ff9800',
+    height: 6,
+    '& .MuiSlider-thumb': {
+      width: 20,
+      height: 20,
+      backgroundColor: '#fff',
+      border: '3px solid #ff9800',
+    }
   };
 
   return (
-    <Box sx={{ mt: 2, p: 2, borderRadius: 2, background: '#111', color: '#fff' }}>
-      <Typography variant="h6" sx={{ mb: 2, color: '#ffb347' }}>
-        Step-Up SIP Calculator
-      </Typography>
+    <Paper sx={{ p: { xs: 3, md: 5 }, background: 'rgba(20,20,20,0.6)', borderRadius: 6, border: '1px solid rgba(255,255,255,0.05)', backdropFilter: 'blur(20px)' }}>
+      <Grid container spacing={6} alignItems="center">
+        <Grid item xs={12} md={7}>
+          <Box sx={{ mb: 4 }}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
+              <Typography sx={{ color: 'rgba(255,255,255,0.6)', fontWeight: 700 }}>Starting Monthly SIP</Typography>
+              <Typography sx={{ color: '#fff', fontWeight: 900, fontSize: '1.2rem' }}>₹{amount.toLocaleString('en-IN')}</Typography>
+            </Box>
+            <Slider value={amount} min={500} max={100000} step={500} onChange={(e, val) => setAmount(val)} sx={sliderStyle} />
+          </Box>
 
-      <TextField
-        label="Monthly SIP (₹)"
-        type="number"
-        value={monthly}
-        onChange={e => setMonthly(e.target.value)}
-        sx={{ mr: 2, mb: 2, input: { color: '#fff' }, label: { color: '#ffb347' } }}
-      />
-      <TextField
-        label="Expected Annual Return (%)"
-        type="number"
-        value={annualReturn}
-        onChange={e => setAnnualReturn(e.target.value)}
-        sx={{ mr: 2, mb: 2, input: { color: '#fff' }, label: { color: '#ffb347' } }}
-      />
-      <TextField
-        label="Duration (Years)"
-        type="number"
-        value={years}
-        onChange={e => setYears(e.target.value)}
-        sx={{ mr: 2, mb: 2, input: { color: '#fff' }, label: { color: '#ffb347' } }}
-      />
-      <TextField
-        label="Step-Up % per Year"
-        type="number"
-        value={stepUp}
-        onChange={e => setStepUp(e.target.value)}
-        sx={{ mb: 2, input: { color: '#fff' }, label: { color: '#ffb347' } }}
-      />
+          <Box sx={{ mb: 4 }}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
+              <Typography sx={{ color: 'rgba(255,255,255,0.6)', fontWeight: 700 }}>Annual Step-Up (%)</Typography>
+              <Typography sx={{ color: '#ffeb3b', fontWeight: 900, fontSize: '1.2rem' }}>{stepUp}%</Typography>
+            </Box>
+            <Slider value={stepUp} min={1} max={50} step={1} onChange={(e, val) => setStepUp(val)} sx={sliderStyle} />
+          </Box>
 
-      <Button
-        variant="contained"
-        sx={{ mt: 1, background: '#ffb347', color: '#0b0b0b', '&:hover': { background: '#ffaa47' } }}
-        onClick={calculateStepUpSIP}
-      >
-        Calculate
-      </Button>
+          <Box sx={{ mb: 4 }}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
+              <Typography sx={{ color: 'rgba(255,255,255,0.6)', fontWeight: 700 }}>Expected Return Rate</Typography>
+              <Typography sx={{ color: '#4caf50', fontWeight: 900, fontSize: '1.2rem' }}>{rate}% p.a.</Typography>
+            </Box>
+            <Slider value={rate} min={1} max={30} step={0.5} onChange={(e, val) => setRate(val)} sx={sliderStyle} />
+          </Box>
 
-      {futureValue !== null && (
-        <Typography sx={{ mt: 2, color: '#ffb347', fontWeight: 'bold' }}>
-          Estimated Future Value: ₹{futureValue.toFixed(2)}
-        </Typography>
-      )}
-    </Box>
+          <Box>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
+              <Typography sx={{ color: 'rgba(255,255,255,0.6)', fontWeight: 700 }}>Investment Period</Typography>
+              <Typography sx={{ color: '#4facfe', fontWeight: 900, fontSize: '1.2rem' }}>{years} Years</Typography>
+            </Box>
+            <Slider value={years} min={1} max={40} step={1} onChange={(e, val) => setYears(val)} sx={sliderStyle} />
+          </Box>
+        </Grid>
+
+        <Grid item xs={12} md={5} sx={{ textAlign: 'center' }}>
+          <Box sx={{ mb: 4 }}>
+            <Typography sx={{ color: 'rgba(255,255,255,0.4)', fontWeight: 800, fontSize: '0.75rem', letterSpacing: 2, mb: 1 }}>ESTIMATED TOTAL WEALTH</Typography>
+            <Typography variant="h3" sx={{ fontWeight: 900, color: '#fff', letterSpacing: '-0.02em' }}>
+              ₹{Math.round(stats.total).toLocaleString('en-IN')}
+            </Typography>
+          </Box>
+
+          <Box sx={{ position: 'relative', width: 220, height: 220, mx: 'auto' }}>
+            <Doughnut data={chartData} options={{ cutout: '80%', plugins: { legend: { display: false } } }} />
+            <Box sx={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', textAlign: 'center' }}>
+              <Typography variant="h6" sx={{ fontWeight: 900, color: '#4caf50', lineHeight: 1 }}>
+                +{((stats.returns / stats.invested) * 100).toFixed(0)}%
+              </Typography>
+              <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.3)', fontWeight: 700 }}>GROWTH</Typography>
+            </Box>
+          </Box>
+
+          <Box sx={{ mt: 4, display: 'flex', justifyContent: 'center', gap: 4 }}>
+            <Box sx={{ textAlign: 'center' }}>
+              <Typography sx={{ color: '#ff9800', fontWeight: 900 }}>₹{Math.round(stats.invested).toLocaleString('en-IN')}</Typography>
+              <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.4)', fontWeight: 700 }}>TOTAL INVESTED</Typography>
+            </Box>
+          </Box>
+        </Grid>
+      </Grid>
+    </Paper>
   );
 }

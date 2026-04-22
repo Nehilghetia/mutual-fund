@@ -13,6 +13,8 @@ import Link from 'next/link';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 
+import { getEnhancedFundDetails } from '../utils/fundDetails';
+
 export default function FundsPage() {
   const [funds, setFunds] = useState([]);
   const [filteredFunds, setFilteredFunds] = useState([]);
@@ -76,10 +78,15 @@ export default function FundsPage() {
     if (search) processed = processed.filter(s =>
       s.schemeName.toLowerCase().includes(search.toLowerCase())
     );
+
     if (sortOrder === 'name_asc')
       processed.sort((a, b) => a.schemeName.localeCompare(b.schemeName));
     if (sortOrder === 'name_desc')
       processed.sort((a, b) => b.schemeName.localeCompare(a.schemeName));
+    if (sortOrder === 'risk_low_high')
+      processed.sort((a, b) => getEnhancedFundDetails(a.schemeCode).riskScore - getEnhancedFundDetails(b.schemeCode).riskScore);
+    if (sortOrder === 'risk_high_low')
+      processed.sort((a, b) => getEnhancedFundDetails(b.schemeCode).riskScore - getEnhancedFundDetails(a.schemeCode).riskScore);
 
     setFilteredFunds(processed);
     setCurrentPage(1);
@@ -195,6 +202,8 @@ export default function FundsPage() {
                 >
                   <MenuItem value="name_asc">Scheme Name (A-Z)</MenuItem>
                   <MenuItem value="name_desc">Scheme Name (Z-A)</MenuItem>
+                  <MenuItem value="risk_low_high">Risk: Low to High</MenuItem>
+                  <MenuItem value="risk_high_low">Risk: High to Low</MenuItem>
                 </Select>
               </FormControl>
             </Grid>
@@ -213,67 +222,109 @@ export default function FundsPage() {
             gap: 3
           }}
         >
-          {currentFunds.map(s => (
-            <Card
-              key={s.schemeCode}
-              className="glass-card"
-              sx={{
-                height: '100%',
-                display: 'flex',
-                flexDirection: 'column',
-                justifyContent: 'space-between',
-                background: 'rgba(26, 26, 26, 0.6)',
-                backdropFilter: 'blur(10px)',
-                color: '#fff',
-                borderRadius: 4,
-                border: '1px solid rgba(255, 255, 255, 0.05)',
-                transition: '0.3s',
-                '&:hover': {
-                  transform: 'translateY(-6px)',
-                  boxShadow: '0 10px 30px rgba(255, 179, 71, 0.15)',
-                  borderColor: '#ffb347'
-                },
-              }}
-            >
-              <CardContent sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', p: 3 }}>
-                <Box sx={{ overflow: 'hidden', mr: 1 }}>
-                  <Typography variant="subtitle1" sx={{ color: '#ffb347', fontWeight: 800, mb: 1, lineHeight: 1.3 }}>
-                    {s.schemeName}
-                  </Typography>
-                  <Typography variant="caption" sx={{ color: 'rgba(255, 255, 255, 0.5)', fontWeight: 600 }}>
-                    CODE: {s.schemeCode}
-                  </Typography>
+          {currentFunds.map(s => {
+            const details = getEnhancedFundDetails(s.schemeCode);
+            return (
+              <Card
+                key={s.schemeCode}
+                className="glass-card"
+                sx={{
+                  height: '100%',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'space-between',
+                  background: 'rgba(26, 26, 26, 0.6)',
+                  backdropFilter: 'blur(10px)',
+                  color: '#fff',
+                  borderRadius: 4,
+                  border: '1px solid rgba(255, 255, 255, 0.05)',
+                  transition: '0.3s',
+                  '&:hover': {
+                    transform: 'translateY(-6px)',
+                    boxShadow: '0 10px 30px rgba(255, 179, 71, 0.15)',
+                    borderColor: '#ffb347'
+                  },
+                }}
+              >
+                <CardContent sx={{ display: 'flex', flexDirection: 'column', height: '100%', p: 3 }}>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
+                    <Box sx={{ overflow: 'hidden', mr: 1 }}>
+                      <Typography variant="subtitle1" sx={{ color: '#ffb347', fontWeight: 800, mb: 1, lineHeight: 1.3, minHeight: '3.4em', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                        {s.schemeName}
+                      </Typography>
+                      <Typography variant="caption" sx={{ color: 'rgba(255, 255, 255, 0.5)', fontWeight: 600 }}>
+                        CODE: {s.schemeCode}
+                      </Typography>
+                    </Box>
+                    <IconButton onClick={() => toggleWatchlist(s)} size="small" sx={{ mt: -0.5 }}>
+                      {watchlist.find(w => w.schemeCode === s.schemeCode) ? (
+                        <StarIcon sx={{ color: '#ff7a00' }} />
+                      ) : (
+                        <StarBorderIcon sx={{ color: 'rgba(255, 255, 255, 0.3)' }} />
+                      )}
+                    </IconButton>
+                  </Box>
+
+                  <Box sx={{ mt: 'auto' }}>
+                    <Grid container spacing={2} sx={{ mb: 2 }}>
+                      <Grid item xs={6}>
+                        <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.4)', display: 'block', textTransform: 'uppercase', letterSpacing: 1 }}>
+                          Latest NAV
+                        </Typography>
+                        <Typography variant="body1" sx={{ fontWeight: 800, color: '#fff' }}>
+                          ₹{details.nav}
+                        </Typography>
+                      </Grid>
+                      <Grid item xs={6}>
+                        <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.4)', display: 'block', textTransform: 'uppercase', letterSpacing: 1 }}>
+                          1Y Return
+                        </Typography>
+                        <Typography variant="body1" sx={{ fontWeight: 800, color: parseFloat(details.oneYearReturn) >= 0 ? '#4caf50' : '#f44336' }}>
+                          {parseFloat(details.oneYearReturn) >= 0 ? '+' : ''}{details.oneYearReturn}%
+                        </Typography>
+                      </Grid>
+                      <Grid item xs={6}>
+                        <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.4)', display: 'block', textTransform: 'uppercase', letterSpacing: 1 }}>
+                          Risk Rating
+                        </Typography>
+                        <Typography variant="body2" sx={{ fontWeight: 700, color: '#ffb347' }}>
+                          {details.riskRating}
+                        </Typography>
+                      </Grid>
+                      <Grid item xs={6}>
+                        <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.4)', display: 'block', textTransform: 'uppercase', letterSpacing: 1 }}>
+                          Exp. Ratio
+                        </Typography>
+                        <Typography variant="body2" sx={{ fontWeight: 700, color: '#fff' }}>
+                          {details.expenseRatio}%
+                        </Typography>
+                      </Grid>
+                    </Grid>
+                  </Box>
+                </CardContent>
+                <Box sx={{ p: 3, pt: 0 }}>
+                  <Button component={Link} href={`/scheme/${s.schemeCode}`} variant="contained" fullWidth
+                    sx={{
+                      background: 'linear-gradient(135deg, #ff7a00, #ffb347)',
+                      color: '#000',
+                      fontWeight: 900,
+                      borderRadius: 3,
+                      py: 1.2,
+                      textTransform: 'none',
+                      fontSize: '0.95rem',
+                      transition: 'all 0.3s ease',
+                      '&:hover': {
+                        background: 'linear-gradient(135deg, #ffb347, #ff7a00)',
+                        filter: 'brightness(1.1)',
+                        boxShadow: '0 8px 25px rgba(255, 122, 0, 0.4)'
+                      }
+                    }}>
+                    View Details
+                  </Button>
                 </Box>
-                <IconButton onClick={() => toggleWatchlist(s)} size="small" sx={{ mt: -0.5 }}>
-                  {watchlist.find(w => w.schemeCode === s.schemeCode) ? (
-                    <StarIcon sx={{ color: '#ff7a00' }} />
-                  ) : (
-                    <StarBorderIcon sx={{ color: 'rgba(255, 255, 255, 0.3)' }} />
-                  )}
-                </IconButton>
-              </CardContent>
-              <Box sx={{ p: 3, pt: 0 }}>
-                <Button component={Link} href={`/scheme/${s.schemeCode}`} variant="contained" fullWidth
-                  sx={{
-                    background: 'linear-gradient(135deg, #ff7a00, #ffb347)',
-                    color: '#000',
-                    fontWeight: 900,
-                    borderRadius: 3,
-                    py: 1.2,
-                    textTransform: 'none',
-                    fontSize: '0.95rem',
-                    transition: 'all 0.3s ease',
-                    '&:hover': {
-                      background: 'linear-gradient(135deg, #ffb347, #ff7a00)',
-                      filter: 'brightness(1.1)',
-                      boxShadow: '0 8px 25px rgba(255, 122, 0, 0.4)'
-                    }
-                  }}>
-                  View Details
-                </Button>
-              </Box>
-            </Card>
-          ))}
+              </Card>
+            );
+          })}
         </Box>
 
         {filteredFunds.length === 0 && (
